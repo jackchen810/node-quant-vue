@@ -1,4 +1,3 @@
-<script src="../../../../node-elm-master/controller-http/task/task.js"></script>
 <template>
     <div class="table">
         <div class="crumbs">
@@ -12,70 +11,119 @@
         </div>
         <el-table :data="task_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
-            <el-table-column prop="stock_code" label="股票代码" width="100"></el-table-column>
+            <!--
             <el-table-column prop="stock_name" label="股票名称" width="100"></el-table-column>
             <el-table-column prop="obj_amount" label="操作量" width="80"></el-table-column>
-            <el-table-column prop="strategy_name" label="策略名称" width="170"></el-table-column>
-            <el-table-column prop="riskctrl_name" label="风控名称" width="170"></el-table-column>
-            <el-table-column prop="gateway_name" W="交易接口" width="170"></el-table-column>
-            <el-table-column prop="price" label="最新" width="80"></el-table-column>
-            <el-table-column prop="volume" label="成交量" width="80"></el-table-column>
-
+            -->
+            <el-table-column prop="strategy_name" label="策略标的/K线类型/策略名称" width="220"></el-table-column>
+            <el-table-column prop="riskctrl_name" label="风控名称" width="160"></el-table-column>
+            <el-table-column prop="gateway_name" label="交易接口" width="160"></el-table-column>
+            <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>
+            <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
+            <el-table-column prop="price" label="最新价" width="80"></el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
-                    <el-button class="btn1" type="text" size="small" @click="delTask(scope.row.task_id,scope.row.gateway_name)">删除</el-button>
-                    <el-button class="btn1" type="danger" size="small" v-if="scope.row.task_status =='running'" @click="stopTask(scope.row.task_id,scope.row.gateway_name)">停止</el-button>
-                    <el-button class="btn1" type="success" size="small" v-else @click="startTask(scope.row.task_id,scope.row.gateway_name)">启动</el-button>
-                    <el-button class="btn1" type="text" size="small" @click="dialogLogVisible=true">日志</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="delTask(scope.row.task_id)">删除</el-button>
+                    <el-button class="btn1" type="danger" size="small" v-if="scope.row.task_status =='running'" @click="stopTask(scope.row.task_id)">停止</el-button>
+                    <el-button class="btn1" type="success" size="small" v-else @click="startTask(scope.row.task_id)">启动</el-button>
                 </template>
             </el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
-                @current-change ="handleCurrentChange"
-                layout="prev, pager, next"
-                :total="1000">
+                    @current-change ="handleCurrentChange"
+                    :current-page="currentPage"
+                    layout="prev, pager, next"
+                    :total="pageTotal">
             </el-pagination>
         </div>
 
         <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form" :rules="rules" ref="form">
-                <el-form-item label="股票代码" prop=stock_code :label-width="formLabelWidth">
-                    <el-input v-model="form.stock_code" class="diainp" auto-complete="off" @change="getStockName"></el-input>
+                    <!--
+                    <el-form-item label="股票名称" prop=stock_name :label-width="formLabelWidth">
+                        <!--
+                        <el-input v-model="form.trade_symbol" class="diainp" auto-complete="off" @change="getStockName"></el-input>
+
+                        <el-input v-model="form.stock_name" class="inp120" auto-complete="off" :disabled="true"></el-input>
+                    </el-form-item>
+                    <!--
+                    <el-form-item label="股票名称" prop=stock_name :label-width="formLabelWidth">
+                        <el-input v-model="form.stock_name" class="diainp" auto-complete="off" :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item label="交易数量" prop=obj_amount :label-width="formLabelWidth">
+                        <el-input v-model="form.obj_amount" class="diainp" auto-complete="off"></el-input>
+                    </el-form-item>
+                    -->
+                <el-form-item label="策略名称" prop="strategy_list" :label-width="formLabelWidth"
+                    v-for="(item, index) in form.strategy_list"
+                    :label="'策略' + index"
+                    :key="item.key"
+                    :prop="item.key"
+                    >
+                    <div class="block">
+                        <label>股票代码：</label>
+                        <el-input v-model="form.strategy_list[index].stock_symbol" class="inp150" auto-complete="off" placeholder="请输入股票代码" @change="changeStockSymbol(index)"></el-input>
+                        <span v-text="form.strategy_list[index].stock_name"></span>
+                    </div>
+                    <div>
+                        <label>K 线周期：</label>
+                        <el-input v-model="form.strategy_main" v-if="index==0&&form.strategy_type>1" class="inp180" auto-complete="off" :disabled="true"></el-input>
+                        <el-select v-model="form.strategy_list[index].stock_ktype" v-else class="inp180" placeholder="请选择K线周期">
+                            <el-option label="1分钟" value="1"></el-option>
+                            <el-option label="5分钟" value="5"></el-option>
+                            <el-option label="15分钟" value="15"></el-option>
+                            <el-option label="30分钟" value="30"></el-option>
+                            <el-option label="60分钟" value="60"></el-option>
+                            <el-option label="120分钟" value="120"></el-option>
+                            <el-option label="日线" value="day"></el-option>
+                            <el-option label="周线" value="week"></el-option>
+                            <el-option label="月线" value="month"></el-option>
+                        </el-select>
+                    </div>
+                    <div v-if="index==0">
+                        <label>交易数量：</label>
+                        <el-input v-model="form.strategy_list[index].trade_amount" class="inp180" auto-complete="off" placeholder="请输入交易数量"></el-input>
+                    </div>
+                    <div>
+                        <label>对应策略：</label>
+                        <el-select v-model="form.strategy_list[index].strategy_name" class="inp180" placeholder="请选择对应策略">
+                            <el-option
+                                    v-for="item in strategy_file_list"
+                                    :key="item"
+                                    :label="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                        <el-button v-if="index==0&&form.strategy_type==1" :disabled="true">N</el-button>
+                        <el-button v-else-if="index==0&&form.strategy_type>1" @click.prevent="addStrategyItem(index)">+</el-button>
+                        <el-button v-else @click.prevent="removeStrategyItem(index)">-</el-button>
+                    </div>
                 </el-form-item>
-                <el-form-item label="股票名称" prop=stock_name :label-width="formLabelWidth">
-                    <el-input v-model="form.stock_name" class="diainp" auto-complete="off" :disabled="true"></el-input>
+                <el-form-item label="" prop="strategy_type" :inline="true":label-width="formLabelWidth">
+                    <el-radio-group v-model="form.strategy_type" @change="changeStrategyItem(index)" :inline="true">
+                        <el-radio label="1">简单策略</el-radio>
+                        <el-radio label="2">多级别分析策略</el-radio>
+                        <el-radio label="3">综合分析策略（策略0为主策略）</el-radio>
+                    </el-radio-group>
                 </el-form-item>
-                <el-form-item label="交易数量" prop=obj_amount :label-width="formLabelWidth">
-                    <el-input v-model="form.obj_amount" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="策略名称" prop="strategy_name" :label-width="formLabelWidth">
-                    <el-select v-model="form.strategy_name" placeholder="请选择对应策略">
-                        <el-option
-                            v-for="item in strategy_list"
-                                :key="item['appName']"
-                            :label="item['appDisplayName']"
-                            :value="item['appDisplayName']">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="风控名称" prop="riskctrl_name" :label-width="formLabelWidth">
+                 <el-form-item label="风控名称" prop="riskctrl_name" :label-width="formLabelWidth">
                     <el-select v-model="form.riskctrl_name" placeholder="请选择对应风控">
                         <el-option
-                            v-for="item in riskctrl_list"
-                            :key="item['appName']"
-                            :label="item['appDisplayName']"
-                            :value="item['appDisplayName']">
+                            v-for="item in riskctrl_file_list"
+                            :key="item"
+                            :label="item"
+                            :value="item">
                         </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="交易接口" prop="gateway_name" :label-width="formLabelWidth">
                     <el-select v-model="form.gateway_name" placeholder="请选择对应交易接口">
                         <el-option
-                            v-for="item in gateway_list"
-                            :key="item['gatewayName']"
-                            :label="item['gatewayDisplayName']"
-                            :value="item['gatewayDisplayName']">
+                            v-for="item in gateway_file_list"
+                            :key="item"
+                            :label="item"
+                            :value="item">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -83,21 +131,6 @@
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">退 出</el-button>
                 <el-button type="primary" @click="saveAdd('form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
-            </div>
-        </el-dialog>
-        <el-dialog title="日志" :visible.sync="dialogLogVisible" class="digcont">
-            <el-form :model="form" :rules="rules" ref="form">
-                <el-form-item prop="route_mac">
-                    <el-input
-                        type="textarea"
-                        :rows="20"
-                        placeholder=""
-                        v-model="log.message">
-                    </el-input>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogLogVisible = false">退 出</el-button>
             </div>
         </el-dialog>
 
@@ -125,26 +158,47 @@
                     task_id:'',
                     task_status:'',
                     obj_amount:'',
-                    stock_code:'',
-                    stock_name:'',
-                    strategy_name:'',
+                    trade_symbol:'111',
+                    trade_ktype:'1',
+                    stock_name:'www',
+                    strategy_main:'主策略',
+                    strategy_type:'1',
+                    strategy_list:[{
+                        stock_symbol:'',
+                        stock_name:'',
+                        stock_ktype:'',
+                        trade_amount:'',
+                        strategy_name:'',
+                    }],
                     riskctrl_name: '',
                     gateway_name: ''
+                },
+
+                rules: {
+                    riskctrl_name:[
+                        {required: true, message: '请输入风控名称', trigger: 'blur'},
+                    ],
+                    gateway_name:[
+                        {required: true, message: '请输入交易接口', trigger: 'blur'}
+                    ],
                 },
                 log:{
                     message:''
                 },
 
-                formLabelWidth: '120px',
+                formLabelWidth: '100px',
+                formLabelWidth50: '50px',
                 fileList3: [],
                 loading:false,
                 fullscreenLoading: false,
                 task_list:[],
-                strategy_list:[],
-                riskctrl_list:[],
-                gateway_list:[],
-                valid_stock_list:[]
+                strategy_file_list:[],
+                riskctrl_file_list:[],
+                gateway_file_list:[],
+                valid_stock_list:[],
 
+                pageTotal:0,
+                currentPage:1
             }
         },
         created: function(){
@@ -154,7 +208,7 @@
             }
 
             this.getTaskList();
-            this.getTaskPrice();
+            //this.getTaskPrice();
             this.getStrategyList();
             this.getRiskCtrlList();
             this.getGatewayList();
@@ -189,7 +243,7 @@
                 var stock_list = []
                 for (var i = 0; i < self.task_list.length; i++) {
                     if (self.task_list[i].task_status == 'running'){
-                        stock_list.push({task_id:self.task_list[i].task_id, stock_code:self.task_list[i].stock_code})
+                        stock_list.push({task_id:self.task_list[i].task_id, trade_symbol:self.task_list[i].trade_symbol})
                     }
                 }
 
@@ -200,7 +254,7 @@
                         for (var i = 0; i < res.data.extra.length; i++) {
                             var item = res.data.extra[i];
                             for (var j = 0; j < self.task_list.length; j++) {
-                                if (item['stock_code'] == self.task_list[j]['stock_code']){
+                                if (item['trade_symbol'] == self.task_list[j]['trade_symbol']){
                                     self.task_list[j]['price'] = item['price']
                                     self.task_list[j]['volume'] = item['volume']
                                 }
@@ -238,7 +292,7 @@
                 self.$axios.post('/api/strategy/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.strategy_list = res.data.extra;
+                        self.strategy_file_list = res.data.extra;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -251,7 +305,7 @@
                 self.$axios.post('/api/riskctrl/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.riskctrl_list = res.data.extra;
+                        self.riskctrl_file_list = res.data.extra;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -264,7 +318,7 @@
                 self.$axios.post('/api/gateway/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.gateway_list = res.data.extra;
+                        self.gateway_file_list = res.data.extra;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -283,12 +337,12 @@
             },
             getStockName: function(){//获取设备类型
                 var self = this;
-                if (self.form.stock_code.length < 6){
+                if (self.form.trade_symbol.length < 6){
                     self.form.stock_name = '';
                     return;
                 }
 
-                var params = {stock_code:self.form.stock_code}
+                var params = {trade_symbol:self.form.trade_symbol}
                 self.loading = false;
                 self.$axios.post('/api/stock/name', params).then(function(res){
                     //self.loading = false;
@@ -320,11 +374,11 @@
                 var self = this;
 
                 var params = {
-                    stock_code:self.form.stock_code,
-                    stock_name:self.form.stock_name,
-                    obj_amount:self.form.obj_amount,
-
-                    strategy_name:self.form.strategy_name,
+                    //trade_symbol:self.form.trade_symbol,
+                    //stock_name:self.form.stock_name,
+                    //obj_amount:self.form.obj_amount,
+                    strategy_type:self.form.strategy_type,
+                    strategy_list:self.form.strategy_list,
                     riskctrl_name:self.form.riskctrl_name,
                     gateway_name:self.form.gateway_name
                 };
@@ -337,6 +391,9 @@
                         self.$message('添加成功');
                         self.getTaskList();
                     }
+                    else{
+                        self.$message('添加失败:' + res.data.extra);
+                    }
 
                 },function(err){
                     self.$message('添加失败');
@@ -345,11 +402,10 @@
                 })
 
             },
-            delTask: function(id,gateway_name){//删除
+            delTask: function(task_id){//删除
                 var self = this;
                 var params = {
-                    task_id: id,
-                    gateway_name:gateway_name
+                    task_id: task_id
                 };
                 self.loading = true;
                 self.$axios.post('/api/task/del', params).then(function(res){
@@ -368,11 +424,10 @@
                     console.log(err);
                 })
             },
-            startTask: function(id,gateway_name){//上架操作
+            startTask: function(task_id){//上架操作
                 var self = this;
                 var params = {
-                    task_id: id,
-                    gateway_name:gateway_name
+                    task_id: task_id,
                 };
                 self.loading = true;
                 self.$axios.post('/api/task/start',params).then(function(res){
@@ -391,11 +446,10 @@
                     console.log(err);
                 })
             },
-            stopTask: function(id,gateway_name){//下架操作
+            stopTask: function(task_id){//下架操作
                 var self = this;
                 var params = {
-                    task_id: id,
-                    gateway_name:gateway_name
+                    task_id: task_id,
                 };
                 self.loading = true;
                 self.$axios.post('/api/task/stop', params).then(function(res){
@@ -414,21 +468,73 @@
                     console.log(err);
                 })
             },
-            handleChange:function(file, fileList) {
-//                console.log(file,fileList);
-                this.form.file_name = file.name;
-            },
             handleCurrentChange:function(val){
                 this.cur_page = val;
                 this.getTaskList();
             },
-            filterTag:function(value, row) {
-                return row.tag === value;
+            changeStockSymbol:function(index) {
+
+                var stock_symbol = this.form.strategy_list[index].stock_symbol;
+
+                //所有行的stock_symbol 一致
+                if (this.form.strategy_type == 2) {
+                    //var value = this.form.strategy_list[index].stock_symbol;
+                    for(var i = 0; i<this.form.strategy_list.length; i++){
+                        this.form.strategy_list[i].stock_symbol = stock_symbol;
+                    }
+                }
+
+
+                //获取stock_symbol  对应的名称
+                if (stock_symbol.length != 6){
+                    this.form.strategy_list[index].stock_name = '';
+                    return;
+                }
+                var self = this;
+                var params = '';
+                if (stock_symbol[0] == '6') {
+                    params = '/sina/list=' + 'sh' + stock_symbol;
+                }else{
+                    params = '/sina/list=' + 'sz' + stock_symbol;
+                }
+                self.$axios.get(params).then(function(res){
+                    var data_substr = res.data.match(/\"(\S*)(?=\")/);
+                    if (data_substr == null) {
+                        return;
+                    }
+                    var fields = data_substr[1].split(",");
+                    self.form.strategy_list[index].stock_name = fields[0];
+
+                },function(err){
+                    self.form.strategy_list[index].stock_name = '';
+                    console.log(err);
+                })
+
+
             },
-            changePage:function(values) {
-                this.information.pagination.per_page = values.perpage;
-                this.information.data = this.information.data;
+            changeStrategyItem: function(index) {
+                //只保留一行
+                var list0 = this.form.strategy_list[0];
+                if (this.form.strategy_type == 1) {
+                    this.form.strategy_list = [list0];
+                }
             },
+            removeStrategyItem(index) {
+                this.form.strategy_list.splice(index, 1);
+            },
+            addStrategyItem(index) {
+                var stock_symbol = '';
+                if (this.form.strategy_type == 2) {
+                    var stock_symbol = this.form.strategy_list[0].stock_symbol;
+                }
+
+                this.form.strategy_list.push({
+                    stock_symbol:stock_symbol,
+                    stock_ktype:'',
+                    strategy_name:'',
+                });
+
+            }
         },
         computed:{
 
@@ -446,6 +552,13 @@
     .btn2{margin-bottom:5px;margin-left:0;}
     .diainp{width:217px;}
     .diainp2{width:400px;}
+    .inp80{width:80px;}
+    .inp100{width:100px;}
+    .inp120{width:120px;}
+    .inp150{width:140px;}
+    .inp160{width:160px;}
+    .inp180{width:180px;}
+    .nowrap{white-space:nowrap;}
     .upload-demo .el-upload {
         cursor: pointer;
         position: relative;

@@ -34,6 +34,14 @@ module.exports = {
                 pathRewrite:{
                     '^/api':''
                 }
+            },
+
+            '/sina':{
+                target:'http://hq.sinajs.cn',
+                changeOrigin:true,
+                pathRewrite:{
+                    '^/sina':''
+                }
             }
         },
         // CSS Sourcemaps off by default because relative paths are "buggy"

@@ -43,7 +43,7 @@ export default new Router({
                 },
                 {
                     path: '/rommanage',
-                        component: resolve => require(['../components/page/RomManage.vue'], resolve)     // vue-datasource组件
+                        component: resolve => require(['../components/page/TaskLog.vue'], resolve)     // vue-datasource组件
                 },
                 {
                     path: '/pluginmanage',
@@ -54,6 +54,14 @@ export default new Router({
                     component: resolve => require(['../components/page/TaskManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
+                    path: '/task/log',
+                    component: resolve => require(['../components/page/TaskLog.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/task/buysell',
+                    component: resolve => require(['../components/page/TaskBuySell.vue'], resolve)     // vue-datasource组件
+                },
+                {
                     path: '/riskctrl/manage',
                     component: resolve => require(['../components/page/RiskManage.vue'], resolve)     // vue-datasource组件
                 },
@@ -61,22 +69,6 @@ export default new Router({
                     path: '/strategy/manage',
                     component: resolve => require(['../components/page/StrategyManage.vue'], resolve)     // vue-datasource组件
                 },
-                {
-                    path: '/scriptmanage',
-                        component: resolve => require(['../components/page/ScriptManage.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/modelmanage',
-                        component: resolve => require(['../components/page/ModelManage.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/basecharts',
-                    component: resolve => require(['../components/page/BaseCharts.vue'], resolve)   // vue-schart组件
-                },
-                {
-                    path: '/sysinfo',
-                    component: resolve => require(['../components/page/Sysinfo.vue'], resolve)   // vue-schart组件
-                }
             ]
         },
         {
