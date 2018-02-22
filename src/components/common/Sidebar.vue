@@ -54,7 +54,7 @@
 		            {
                         icon: 'el-icon-date',
                         index: '4',
-                        title: '任务管理',
+                        title: '交易系统管理',
                         subs: [
                             {
                                 index: '/task/manage',
@@ -67,31 +67,78 @@
                             {
                                 index: '/task/buysell',
                                 title: '买卖点统计'
+                            },
+                            {
+                                index: '/strategy/manage',
+                                title: '策略列表'
+                            },
+                            {
+                                index: '/riskctrl/manage',
+                                title: '风控列表'
+                            },
+                            {
+                                index: '/trade/gateway',
+                                title: '交易接口列表'
+                            },
+                            {
+                                index: '/market/gateway',
+                                title: '行情接口列表'
                             }
                         ]
                     },
                     {
                         icon: 'el-icon-document',
                         index: '5',
-                        title: '策略管理',
+                        title: '选股系统管理',
                         subs: [
                             {
-                                index: '/strategy/manage',
-                                title: '策略列表'
+                                index: '/select/strategy',
+                                title: '选股策略'
+                            },
+                            {
+                                index: '/start/select',
+                                title: '发起选股'
+                            },
+                            {
+                                index: '/select/result',
+                                title: '选股结果'
                             }
                         ]
                     },
                     {
                         icon: 'el-icon-share',
                         index: '6',
-                        title: '风险管理',
+                        title: '回测系统管理',
                         subs: [
                             {
-                                index: '/riskctrl/manage',
-                                title: '风控列表'
+                                index: '/backtest/manage',
+                                title: '回测管理'
+                            },
+                            {
+                                index: '/start/backtest',
+                                title: '发起回测'
+                            },
+                            {
+                                index: '/backtest/result',
+                                title: '回测结果'
                             }
                         ]
-                    }
+                    },
+                    {
+                        icon: 'el-icon-document',
+                        index: '7',
+                        title: '历史数据管理',
+                        subs: [
+                            {
+                                index: '/history/data',
+                                title: '历史数据'
+                            },
+                            {
+                                index: '/data/manage',
+                                title: '数据管理'
+                            }
+                        ]
+                    },
                 ]
             }
         },

@@ -15,9 +15,10 @@
             <el-table-column prop="stock_name" label="股票名称" width="100"></el-table-column>
             <el-table-column prop="obj_amount" label="操作量" width="80"></el-table-column>
             -->
+            <el-table-column prop="market_gateway" label="行情接口" width="160"></el-table-column>
             <el-table-column prop="strategy_name" label="策略标的/K线类型/策略名称" width="220"></el-table-column>
             <el-table-column prop="riskctrl_name" label="风控名称" width="160"></el-table-column>
-            <el-table-column prop="gateway_name" label="交易接口" width="160"></el-table-column>
+            <el-table-column prop="order_gateway" label="交易接口" width="160"></el-table-column>
             <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>
             <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
             <el-table-column prop="price" label="最新价" width="80"></el-table-column>
@@ -55,6 +56,17 @@
                         <el-input v-model="form.obj_amount" class="diainp" auto-complete="off"></el-input>
                     </el-form-item>
                     -->
+
+                <el-form-item label="行情接口" prop="market_gateway" :label-width="formLabelWidth">
+                    <el-select v-model="form.market_gateway" placeholder="请选择对应行情接口">
+                        <el-option
+                            v-for="item in market_gateway_file_list"
+                            :key="item"
+                            :label="item"
+                            :value="item">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="策略名称" prop="strategy_list" :label-width="formLabelWidth"
                     v-for="(item, index) in form.strategy_list"
                     :label="'策略' + index"
@@ -117,10 +129,10 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="交易接口" prop="gateway_name" :label-width="formLabelWidth">
-                    <el-select v-model="form.gateway_name" placeholder="请选择对应交易接口">
+                <el-form-item label="交易接口" prop="order_gateway" :label-width="formLabelWidth">
+                    <el-select v-model="form.order_gateway" placeholder="请选择对应交易接口">
                         <el-option
-                            v-for="item in gateway_file_list"
+                            v-for="item in order_gateway_file_list"
                             :key="item"
                             :label="item"
                             :value="item">
@@ -171,14 +183,15 @@
                         strategy_name:'',
                     }],
                     riskctrl_name: '',
-                    gateway_name: ''
+                    order_gateway: '',
+                    market_gateway: ''
                 },
 
                 rules: {
                     riskctrl_name:[
                         {required: true, message: '请输入风控名称', trigger: 'blur'},
                     ],
-                    gateway_name:[
+                    order_gateway:[
                         {required: true, message: '请输入交易接口', trigger: 'blur'}
                     ],
                 },
@@ -194,7 +207,8 @@
                 task_list:[],
                 strategy_file_list:[],
                 riskctrl_file_list:[],
-                gateway_file_list:[],
+                order_gateway_file_list:[],
+                market_gateway_file_list:[],
                 valid_stock_list:[],
 
                 pageTotal:0,
@@ -211,7 +225,8 @@
             //this.getTaskPrice();
             this.getStrategyList();
             this.getRiskCtrlList();
-            this.getGatewayList();
+            this.getOrderGatewayList();
+            this.getMarketGatewayList();
 
             //this.getValidStockList();
         },
@@ -312,13 +327,26 @@
                     }
                 })
             },
-            getGatewayList: function(){//获取设备类型
+            getOrderGatewayList: function(){//获取设备类型
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/gateway/list').then(function(res){
+                self.$axios.post('/api/order/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.gateway_file_list = res.data.extra;
+                        self.order_gateway_file_list = res.data.extra;
+                    }
+                    else{
+                        console.log('resp:', res.data)
+                    }
+                })
+            },
+            getMarketGatewayList: function(){//获取设备类型
+                var self = this;
+                self.loading = true;
+                self.$axios.post('/api/market/list').then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.order_gateway_file_list = res.data.extra;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -380,7 +408,7 @@
                     strategy_type:self.form.strategy_type,
                     strategy_list:self.form.strategy_list,
                     riskctrl_name:self.form.riskctrl_name,
-                    gateway_name:self.form.gateway_name
+                    order_gateway:self.form.order_gateway
                 };
 
                 self.loading = true;

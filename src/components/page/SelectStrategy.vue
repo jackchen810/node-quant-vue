@@ -9,7 +9,7 @@
         <div class="handle-box rad-group">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建版本</el-button>
         </div>
-        <el-table :data="strategy_file_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
+        <el-table :data="strategy_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="appName" label="策略名称" width="170"></el-table-column>
             <el-table-column prop="appDisplayName" label="策略中文名称" width="170"></el-table-column>
         </el-table>
@@ -21,14 +21,14 @@
             </el-pagination>
         </div>
 
-        <el-dialog title="添加交易策略" :visible.sync="dialogFormVisible" class="digcont">
+        <el-dialog title="添加ROM版本" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form" :rules="rules" ref="form">
                 <el-form-item label="上传" :label-width="formLabelWidth">
                     <el-upload
                         class="upload-demo"
                         ref="upload"
                         name="file_name"
-                        action="http://127.0.0.1:8000/strategy/upload"
+                        action="http://api.rom.kunteng.org/rom/upload"
                         :data="form"
                         :beforeUpload="beforeUpload"
                         :on-success="handleSuccess"
@@ -37,8 +37,27 @@
                         <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="策略名称" prop=alias_name :label-width="formLabelWidth">
-                    <el-input v-model="form.alias_name" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="ROM版本号" prop=rom_version :label-width="formLabelWidth">
+                    <el-input v-model="form.rom_version" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="设备类型" prop="dev_type" :label-width="formLabelWidth">
+                    <el-select v-model="form.dev_type" placeholder="请选择对应设备型号">
+                        <el-option
+                            v-for="item in typeListData"
+                            :key="item"
+                            :label="item"
+                            :value="item">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="版本类型" prop="ver_type" :label-width="formLabelWidth">
+                    <el-select v-model="form.ver_type" placeholder="请选择版本类型">
+                        <el-option label="正式版本" value="正式版本"></el-option>
+                        <el-option label="测试版本" value="测试版本"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="MD5串码" prop="md5_value" :label-width="formLabelWidth">
+                    <el-input v-model="form.md5_value" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="备注说明" prop="comment" :label-width="formLabelWidth">
                     <el-input v-model="form.comment" class="diainp" auto-complete="off"></el-input>
@@ -69,11 +88,14 @@
 
                 form: {
                     file_name:'',
-                    alias_name:'',
+                    rom_version:'',
+                    dev_type:'',
+                    ver_type: '',
+                    md5_value:'',
                     comment:''
                 },
                 rules: {
-                    alias_name:[
+                    rom_version:[
                         {required: true, message: '请输入ROM版本号', trigger: 'blur'}
                     ],
                     dev_type:[
@@ -90,8 +112,7 @@
                 fileList3: [],
                 loading:false,
                 fullscreenLoading: false,
-                strategy_list:[],
-                strategy_file_list:[],
+                strategy_list:[]
 
             }
         },
@@ -99,16 +120,17 @@
             this.getStrategyList();
         },
         methods: {
-            getStrategyList: function(){//获取rom列表
+            getStrategyList: function(){//获取task列表
                 var self = this;
                 self.loading = true;
                 self.$axios.post('/api/strategy/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.strategy_file_list = res.data.extra;
+                        self.pageTotal = res.data.extra.length;
+                        self.strategy_list = res.data.extra.slice(0,10);
                     }
                     else{
-                        console.log('resp:', res.data)
+                        self.strategy_list = []
                     }
                 })
             },

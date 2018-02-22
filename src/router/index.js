@@ -33,22 +33,7 @@ export default new Router({
                     path: '/pushresultdetail',
                         component: resolve => require(['../components/page/PushResultDetail.vue'], resolve)     // vue-datasource组件
                 },
-                {
-                    path: '/updateromstatus',
-                        component: resolve => require(['../components/page/UpdateRomStatus.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/devstatus',
-                        component: resolve => require(['../components/page/DevStatus.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/rommanage',
-                        component: resolve => require(['../components/page/TaskLog.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/pluginmanage',
-                        component: resolve => require(['../components/page/PluginManage.vue'], resolve)     // vue-datasource组件
-                },
+                /////
                 {
                     path: '/task/manage',
                     component: resolve => require(['../components/page/TaskManage.vue'], resolve)     // vue-datasource组件
@@ -62,12 +47,46 @@ export default new Router({
                     component: resolve => require(['../components/page/TaskBuySell.vue'], resolve)     // vue-datasource组件
                 },
                 {
+                    path: '/strategy/manage',
+                    component: resolve => require(['../components/page/StrategyManage.vue'], resolve)     // vue-datasource组件
+                },
+                {
                     path: '/riskctrl/manage',
                     component: resolve => require(['../components/page/RiskManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
-                    path: '/strategy/manage',
+                    path: '/trade/gateway',
                     component: resolve => require(['../components/page/StrategyManage.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/market/gateway',
+                    component: resolve => require(['../components/page/StrategyManage.vue'], resolve)     // vue-datasource组件
+                },
+                /////
+                {
+                    path: '/select/strategy',
+                    component: resolve => require(['../components/page/SelectStrategy.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/start/select',
+                    component: resolve => require(['../components/page/StartSelect.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/select/result',
+                    component: resolve => require(['../components/page/SelectResult.vue'], resolve)     // vue-datasource组件
+                },
+                /////
+                {
+                    path: '/backtest/manage',
+                    component: resolve => require(['../components/page/BacktestManage.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/start/backtest',
+                    component: resolve => require(['../components/page/StartBacktest.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/backtest/result',
+                    component: resolve => require(['../components/page/BacktestResult.vue'], resolve)     // vue-datasource组件
                 },
             ]
         },

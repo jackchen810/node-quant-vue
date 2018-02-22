@@ -2,38 +2,28 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-star-on"></i> 风控管理</el-breadcrumb-item>
-                <el-breadcrumb-item>风控列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-star-on"></i> ROM管理</el-breadcrumb-item>
+                <el-breadcrumb-item>ROM列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box rad-group">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建风控模型</el-button>
+        <div class="handle-box rad-group" v-if="isShow">
+            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建版本</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <!--<el-table-column label="状态" width="100":filters="[{ text: '离线', value: '离线' }, { text: '未激活', value: '未激活' }]" :filter-method="filterTag">-->
-                <!--<template slot-scope="scope">-->
-                    <!--<el-tag :type="scope.row.zt == '离线' ? 'warning' : 'success'" close-transition>{{scope.row.zt}}</el-tag>-->
-                <!--</template>-->
-            <!--</el-table-column>-->
             <el-table-column prop="create_date" label="创建时间" width="170"></el-table-column>
-            <el-table-column prop="rom_version" label="版本号" width="170"></el-table-column>
-            <!--<el-table-column prop="oem" label="OEM" width="70"></el-table-column>-->
+            <el-table-column prop="file_name" label="文件名" width="300"></el-table-column>
+            <el-table-column prop="rom_version" label="ROM版本号" width="170"></el-table-column>
             <el-table-column prop="ver_type" label="版本类型" width="160" :filters="[{ text: '测试版本', value: '测试版本' }, { text: '正式版本', value: '正式版本' }]" :filter-method="filterTag">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.ver_type == '测试版本' ? 'warning' : 'success'"  size="small" close-transition>{{scope.row.ver_type}}</el-tag>
                 </template>
             </el-table-column>
-            <!--<el-table-column label="51盒子状态" width="150">-->
-                <!--<template scope="scope">-->
-                    <!--<el-tag type="warning">{{scope.row.hzzt}}</el-tag>-->
-                <!--</template>-->
-            <!--</el-table-column>-->
             <el-table-column prop="dev_type" label="设备型号" width="160"></el-table-column>
-            <el-table-column prop="comment" label="更新说明" width="160"></el-table-column>
-            <el-table-column label="操作">
+            <el-table-column prop="comment" label="更新说明"></el-table-column>
+            <el-table-column label="操作" v-if="isShow" width="160">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="downloadRom(scope.row._id,scope.row.file_name,scope.row.rom_status)">下载</el-button>
-                    <el-button class="btn1" type="text" size="small" @click="delRom(scope.row._id,scope.row.file_name)">删除</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="delRom(scope.row._id,scope.row.file_name,scope.$index)">删除</el-button>
                     <el-button class="btn1" type="danger" size="small" v-if="scope.row.rom_status =='normal'" @click="revokeRom(scope.row._id,scope.row.file_name)">下架</el-button>
                     <el-button class="btn1" type="success" size="small" v-else @click="releaseRom(scope.row._id,scope.row.file_name)">上架</el-button>
                 </template>
@@ -55,7 +45,8 @@
                         class="upload-demo"
                         ref="upload"
                         name="file_name"
-                        action="http://api.rom.kunteng.org/rom/upload"
+                        :action="uploadUrl"
+                        with-credentials="true"
                         :data="form"
                         :beforeUpload="beforeUpload"
                         :on-change="handleChange"
@@ -68,7 +59,7 @@
                 <el-form-item label="ROM版本号" prop=rom_version :label-width="formLabelWidth">
                     <el-input v-model="form.rom_version" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="设备类型" prop="dev_type" :label-width="formLabelWidth">
+                <el-form-item label="设备型号" prop="dev_type" :label-width="formLabelWidth">
                     <el-select v-model="form.dev_type" placeholder="请选择对应设备型号">
                         <el-option
                             v-for="item in typeListData"
@@ -85,7 +76,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="MD5串码" prop="md5_value" :label-width="formLabelWidth">
-                    <el-input v-model="form.md5_value" class="diainp" auto-complete="off"></el-input>
+                    <el-input v-model="form.md5_value" class="diainp" :disabled="true" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="备注说明" prop="comment" :label-width="formLabelWidth">
                     <el-input v-model="form.comment" class="diainp" auto-complete="off"></el-input>
@@ -93,7 +84,7 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveAdd('form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
+                <el-button type="primary" @click="saveAdd('form')">添 加</el-button>
             </div>
         </el-dialog>
 
@@ -102,58 +93,14 @@
 
 <script>
     import global_ from 'components/common/Global';
+    var crypto = require('crypto');
     export default {
         data: function(){
             return {
-                url: './static/datasource.json',
-                information: {
-                    pagination:{},
-                    data:[]
-                },
-
+                uploadUrl:global_.baseUrl+'/rom/upload',
+                isShow:localStorage.getItem('userMsg') =='1'?false:true,
                 dialogFormVisible:false,
                 radio3:'全部',
-                tableData2:[
-                    {
-                        "cjsj":"2017-11-17 14:05:58",
-                        "bbh":"2.11.2514",
-                        "oem":"LD",
-                        "bblx":"test",
-                        "sbxh":"zc9525a",
-                        "xpxh":"MT7628AN",
-                        "gxsm":"企业智能中枢测试"
-                    },
-                    {
-                        "cjsj":"2017-11-17 14:05:58",
-                        "bbh":"2.11.2514",
-                        "oem":"LD",
-                        "bblx":"official",
-                        "sbxh":"zc9525a",
-                        "xpxh":"MT7628AN+MT7610E",
-                        "gxsm":"LD"
-                    },
-                    {
-                        "cjsj":"2017-11-17 14:05:58",
-                        "bbh":"2.11.2514",
-                        "oem":"ZC",
-                        "bblx":"official",
-                        "sbxh":"zc9525a",
-                        "xpxh":"MT7628AN",
-                        "gxsm":"航信打印版本"
-                    },
-                    {
-                        "cjsj":"2017-11-17 14:05:58",
-                        "bbh":"2.11.2514",
-                        "oem":"LD",
-                        "bblx":"test",
-                        "sbxh":"zc9525a",
-                        "xpxh":"MT7628AN",
-                        "gxsm":"企业智能中枢测试"
-                    }
-
-
-                ],
-
                 form: {
                     file_name:'',
                     rom_version:'',
@@ -171,7 +118,10 @@
                     ],
                     ver_type:[
                         {required: true, message: '请输入版本类型', trigger: 'blur'}
-                    ]
+                    ],
+                    md5_value:[
+                        {required: true, message: 'MD5串码不能为空', trigger: 'blur'}
+                    ],
                 },
                 formLabelWidth: '120px',
                 fileList3: [],
@@ -185,67 +135,101 @@
             }
         },
         created: function(){
-            this.getData();
+            this.getData({});
             this.getTypes();
         },
         methods: {
             getTypes: function(){//获取设备类型
                 var self = this;
                 self.$axios.post(global_.baseUrl+'/devtype/types').then(function(res){
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.typeListData = res.data.extra;
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
                 })
             },
-            getData: function(){//获取rom列表
+            getData: function(params){//获取rom列表
                 var self = this;
                 self.loading = true;
-                var params = {
-//                    page_size:10,
-//                    current_page:1,
-//                    sort:'asc'
-                };
-                self.$axios.post(global_.baseUrl+'/rom/list').then(function(res){
+                self.$axios.post(global_.baseUrl+'/rom/list',params).then(function(res){
 //                    console.log(res);
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
-                        self.listData = res.data.extra;
+                        if(JSON.stringify(params) == '{}'){
+                            self.pageTotal = res.data.extra.length;
+                            self.listData = res.data.extra.slice(0,10);
+                        }else{
+                            self.listData = res.data.extra;
+                        }
+
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
                 })
             },
+            handleCurrentChange:function(val){
+                this.currentPage = val;
+                this.getData({page_size:10,current_page:this.currentPage});
+            },
             beforeUpload: function(file){
-                console.log(file);
+                // console.log(file);
                 this.form.file_name = file.name;
+                // this.form.md5_value = md5(file.name);
                 return true;
             },
             handleSuccess: function(response,file,fileList){
-                console.log(response);
+                var self = this;
+                if(response.ret_code == 0){
+                    this.$message({message:'创建成功',type:'success'});
+                }else{
+                    this.$message.error(response.extra);
+                }
+                self.fileList3 = [];
+                self.form.file_name = '';
+                self.form.rom_version = '';
+                self.form.dev_type = '';
+                self.form.ver_type = '';
+                self.form.md5_value = ' ';
+                self.form.comment = '';
                 this.fullscreenLoading  = false;
-                this.$message('创建成功');
+
                 this.dialogFormVisible = false;
-                this.getData();
+                this.getData({});
             },
             handleError: function(response,file,fileList){
-                this.$message('操作失败');
-                self.fullscreenLoading  = false;
+                var self = this;
+                this.$message.error('操作失败');
+                this.fullscreenLoading  = false;
             },
             saveAdd: function(formName){
                 var self = this;
                 self.$refs[formName].validate(function(valid){
                     if(valid){
-                        console.log('验证成功')
+                        self.fullscreenLoading  = true;
+                        self.$refs.upload.submit();
                     }else{
                         return false;
                         console.log('验证失败');
                     }
                 });
-                self.fullscreenLoading  = true;
-                self.$refs.upload.submit();
             },
             downloadRom: function(id,fileName,status){//下载
                 var self = this;
                 if(status == 'revoke'){
-                    self.$message('固件已下架');
+                    self.$message({message:'固件已下架',type:'warning'});
                     return false;
                 }
                 var params = {
@@ -255,7 +239,7 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/rom/download',params).then(function(res){
                     self.loading = false;
-                    console.log(res);
+                    // console.log(res);
                     var blob = new Blob([res.data]);
                     var reader = new FileReader();
                     reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
@@ -264,23 +248,26 @@
                         var a = document.createElement('a');
                         a.download = fileName;
                         a.href = e.target.result;
-//                        $("body").append(a);  // 修复firefox中无法触发click
+                        document.body.appendChild(a);  // 修复firefox中无法触发click
                         a.click();
-//                        $(a).remove();
+                        document.body.removeChild(a);
                     }
-
-                    if(res.data.ret_code == 0){
-                        self.$message('删除成功');
-                        self.getData();
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }else{
+                        self.$message.error(res.data.extra);
                     }
 
                 },function(err){
-                    self.$message('删除失败');
+                    self.$message.error('下载失败');
                     self.loading = false;
                     console.log(err);
                 })
             },
-            delRom: function(id,fileName){//删除
+            delRom: function(id,fileName,i){//删除
                 var self = this;
                 var params = {
                     _id: id,
@@ -289,13 +276,22 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/rom/del',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
-                        self.$message('删除成功');
-                        self.getData();
+                        self.$message({message:'删除成功',type:'success'});
+                        // self.getData({});
+                        self.listData.splice(i,1);
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
-                    self.$message('删除失败');
+                    self.$message.error('删除失败');
                     self.loading = false;
                     console.log(err);
                 })
@@ -309,15 +305,22 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/rom/release',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
-                        self.$message('操作成功');
+                        self.$message({message:'操作成功',type:'success'});
                         self.getData();
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
-                    self.$message('操作失败');
+                    self.$message.error('操作失败');
                     self.loading = false;
-                    console.log(err);
                 })
             },
             revokeRom: function(id,fileName){//下架操作
@@ -329,27 +332,45 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/rom/revoke',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
-                        self.$message('操作成功');
+                        self.$message({message:'操作成功',type:'success'});
                         self.getData();
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
-                    self.$message('操作失败');
+                    self.$message.error('操作失败');
                     self.loading = false;
-                    console.log(err);
                 })
             },
-            handleChange:function(file, fileList) {
-//                console.log(file,fileList);
+            handleChange:function(file) {
+               var self = this;
                 this.form.file_name = file.name;
-            },
-            handleCurrentChange:function(val){
-                this.cur_page = val;
-                this.getData();
+                this.form.rom_version = file.name.split('-')[2] || '';
+
+                var reader=new FileReader();
+                reader.onload=function(f){
+                    var md5sum = crypto.createHash('md5');
+                    //md5sum.update(String.fromCharCode.apply(null, this.result));
+                    md5sum.update(this.result, 'binary');
+                    //console.log('dd:', this.result);
+                    var str = md5sum.digest('hex');
+                    self.form.md5_value = str;
+                }
+                //reader.readAsBinaryString(fileList[0]);
+                reader.readAsBinaryString(file.raw);
+                self.form.md5_value = self.form.rom_version ==''?' ': self.form.md5_value;
+
             },
             filterTag:function(value, row) {
-                return row.tag === value;
+                return row.ver_type === value;
             },
             changePage:function(values) {
                 this.information.pagination.per_page = values.perpage;
@@ -362,22 +383,14 @@
     }
 </script>
 
-<style src="../../../static/css/datasource.css"></style>
 <style>
     .rad-group{margin-bottom:20px;}
     .handle-input{  width: 300px;  display: inline-block;  }
     .handle-box2{display:inline-block;float:right;}
-    /*.el-table_1_column_5{color:#eb9e05;}*/
     .orange{color:#eb9e05;background-color:none;}
     .btn2{margin-bottom:5px;margin-left:0;}
     .diainp{width:217px;}
     .diainp2{width:400px;}
-    .upload-demo .el-upload {
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-    }
-    .upload-demo .el-upload:hover {
-        border-color: #409EFF;
-    }
+    .upload-demo .el-upload {cursor: pointer;position: relative;overflow: hidden;}
+    .upload-demo .el-upload:hover {border-color: #409EFF;}
 </style>
