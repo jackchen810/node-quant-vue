@@ -7,6 +7,7 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
+            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogMarketVisible=true">绑定行情接口</el-button>
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建任务</el-button>
         </div>
         <el-table :data="task_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
@@ -22,7 +23,7 @@
             <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>
             <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
             <el-table-column prop="price" label="最新价" width="80"></el-table-column>
-            <el-table-column label="操作">
+            <el-table-column label="操作" width="120">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="delTask(scope.row.task_id)">删除</el-button>
                     <el-button class="btn1" type="danger" size="small" v-if="scope.row.task_status =='running'" @click="stopTask(scope.row.task_id)">停止</el-button>
@@ -38,6 +39,24 @@
                     :total="pageTotal">
             </el-pagination>
         </div>
+        <el-dialog title="绑定行情接口" :visible.sync="dialogMarketVisible" class="digmarket">
+            <el-form :model="form" :rules="rules" ref="form">
+                <el-form-item label="行情接口" prop="market_gateway" :label-width="formLabelWidth">
+                    <el-select v-model="form.market_gateway" placeholder="请选择对应行情接口">
+                        <el-option
+                                v-for="item in market_gateway_file_list"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogMarketVisible = false">退 出</el-button>
+                <el-button type="primary" @click="dialogMarketVisible = false">确 定</el-button>
+            </div>
+        </el-dialog>
 
         <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form" :rules="rules" ref="form">
@@ -56,17 +75,6 @@
                         <el-input v-model="form.obj_amount" class="diainp" auto-complete="off"></el-input>
                     </el-form-item>
                     -->
-
-                <el-form-item label="行情接口" prop="market_gateway" :label-width="formLabelWidth">
-                    <el-select v-model="form.market_gateway" placeholder="请选择对应行情接口">
-                        <el-option
-                            v-for="item in market_gateway_file_list"
-                            :key="item"
-                            :label="item"
-                            :value="item">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
                 <el-form-item label="策略名称" prop="strategy_list" :label-width="formLabelWidth"
                     v-for="(item, index) in form.strategy_list"
                     :label="'策略' + index"
@@ -161,7 +169,7 @@
                 },
 
                 dialogFormVisible:false,
-                dialogLogVisible:false,
+                dialogMarketVisible:false,
                 radio3:'全部',
 
                 tiemout:'',
@@ -346,7 +354,7 @@
                 self.$axios.post('/api/market/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.order_gateway_file_list = res.data.extra;
+                        self.market_gateway_file_list = res.data.extra;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -408,7 +416,8 @@
                     strategy_type:self.form.strategy_type,
                     strategy_list:self.form.strategy_list,
                     riskctrl_name:self.form.riskctrl_name,
-                    order_gateway:self.form.order_gateway
+                    order_gateway:self.form.order_gateway,
+                    market_gateway:self.form.market_gateway
                 };
 
                 self.loading = true;
