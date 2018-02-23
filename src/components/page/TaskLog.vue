@@ -29,7 +29,7 @@
     export default {
         data: function(){
             return {
-                radio3:'全部',
+                radio3:'all',
                 formLabelWidth: '120px',
                 loading:false,
                 fullscreenLoading: false,
@@ -46,16 +46,22 @@
             getData: function(params){//获取rom列表
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/log/list').then(function(res){
+                self.$axios.post('/api/log/list', params).then(function(res){
 //                    console.log(res);
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.listData = res.data.extra;
+                        if(JSON.stringify(params) == '{}'){
+                            self.pageTotal = res.data.extra.length;
+                            self.listData = res.data.extra.slice(0,10);
+                        }else{
+                            self.listData = res.data.extra;
+                        }
                     }
                 });
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
+                console.log(this.radio3, this.currentPage);
                 this.getData({page_size:10,current_page:this.currentPage});
             },
             filterTag:function(value, row) {
