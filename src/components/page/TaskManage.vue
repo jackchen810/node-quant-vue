@@ -9,6 +9,8 @@
         <div class="handle-box rad-group">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogMarketVisible=true">绑定行情接口</el-button>
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建任务</el-button>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当前绑定的行情接口：</span>
+            <span v-text="form.bind_market_gateway"></span>
         </div>
         <el-table :data="task_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
@@ -54,27 +56,11 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogMarketVisible = false">退 出</el-button>
-                <el-button type="primary" @click="dialogMarketVisible = false">确 定</el-button>
+                <el-button type="primary" @click="bindMarket(form.market_gateway)"v-loading.fullscreen.lock="fullscreenLoading">确 定</el-button>
             </div>
         </el-dialog>
-
-        <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digcont">
+        <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digcont" v-if="form.market_gateway != ''" >
             <el-form :model="form" :rules="rules" ref="form">
-                    <!--
-                    <el-form-item label="股票名称" prop=stock_name :label-width="formLabelWidth">
-                        <!--
-                        <el-input v-model="form.trade_symbol" class="diainp" auto-complete="off" @change="getStockName"></el-input>
-
-                        <el-input v-model="form.stock_name" class="inp120" auto-complete="off" :disabled="true"></el-input>
-                    </el-form-item>
-                    <!--
-                    <el-form-item label="股票名称" prop=stock_name :label-width="formLabelWidth">
-                        <el-input v-model="form.stock_name" class="diainp" auto-complete="off" :disabled="true"></el-input>
-                    </el-form-item>
-                    <el-form-item label="交易数量" prop=obj_amount :label-width="formLabelWidth">
-                        <el-input v-model="form.obj_amount" class="diainp" auto-complete="off"></el-input>
-                    </el-form-item>
-                    -->
                 <el-form-item label="策略名称" prop="strategy_list" :label-width="formLabelWidth"
                     v-for="(item, index) in form.strategy_list"
                     :label="'策略' + index"
@@ -153,7 +139,13 @@
                 <el-button type="primary" @click="saveAdd('form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
             </div>
         </el-dialog>
-
+        <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digcont" center="true" v-else >
+            <span>请先绑定行情接口</span>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">退 出</el-button>
+                <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -170,6 +162,7 @@
 
                 dialogFormVisible:false,
                 dialogMarketVisible:false,
+                dialogCheckVisible:false,
                 radio3:'全部',
 
                 tiemout:'',
@@ -192,7 +185,8 @@
                     }],
                     riskctrl_name: '',
                     order_gateway: '',
-                    market_gateway: ''
+                    market_gateway: '',
+                    bind_market_gateway: ''
                 },
 
                 rules: {
@@ -235,6 +229,7 @@
             this.getRiskCtrlList();
             this.getOrderGatewayList();
             this.getMarketGatewayList();
+            this.getBindMarket();
 
             //this.getValidStockList();
         },
@@ -390,6 +385,18 @@
                     }
                 })
             },
+            getBindMarket: function(){//获取绑定的行情
+                var self = this;
+                self.$axios.post('/api/market/bindobj').then(function(res){
+                    if(res.data.ret_code == 0){
+                        self.form.bind_market_gateway = res.data.extra;
+                        self.form.market_gateway = res.data.extra;
+                    }
+                    else{
+                        console.log('resp:', res.data)
+                    }
+                })
+            },
             beforeUpload: function(file){
                 console.log(file);
                 this.form.file_name = file.name;
@@ -406,6 +413,26 @@
                 this.$message('操作失败');
                 self.fullscreenLoading  = false;
             },
+
+            bindMarket: function(file_name) {
+                var self = this;
+                var params = {
+                    file_name:file_name,
+                    is_bind:'true',
+                };
+                self.$axios.post('/api/market/bind', params).then(function(res){
+                    console.log(res);
+                    if(res.data.ret_code == 0){
+                        self.$message('绑定成功');
+                        self.dialogMarketVisible = false;
+                        self.form.bind_market_gateway = self.form.market_gateway;
+                    }
+                    else{
+                        self.$message('绑定失败:' + res.data.extra);
+                    }
+                });
+            },
+
             saveAdd: function(formName){
                 var self = this;
 
