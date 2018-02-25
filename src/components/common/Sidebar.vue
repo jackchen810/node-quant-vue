@@ -130,13 +130,13 @@
                         title: '历史数据管理',
                         subs: [
                             {
+                                index: '/data/manage',
+                                title: '数据管理'
+                            },
+                            {
                                 index: '/history/data',
                                 title: '历史数据'
                             },
-                            {
-                                index: '/data/manage',
-                                title: '数据管理'
-                            }
                         ]
                     },
                 ]

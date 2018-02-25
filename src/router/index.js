@@ -88,6 +88,15 @@ export default new Router({
                     path: '/backtest/result',
                     component: resolve => require(['../components/page/BacktestResult.vue'], resolve)     // vue-datasource组件
                 },
+                /////
+                {
+                    path: '/data/manage',
+                    component: resolve => require(['../components/page/DataManage.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/history/data',
+                    component: resolve => require(['../components/page/HistoryData.vue'], resolve)     // vue-datasource组件
+                },
             ]
         },
         {
