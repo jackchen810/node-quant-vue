@@ -28,10 +28,9 @@
             <el-form :model="form" :rules="rules" ref="form">
                 <el-form-item label="每天" prop="task_exce_time" :inline="true":label-width="formLabelWidth">
                     <el-time-picker
-                            arrow-control
                             v-model="form.task_exce_time"
                             :picker-options="{selectableRange: '00:00:00 - 23:59:59'}"
-                            placeholder="任意时间点">
+                            placeholder="请选择执行时间">
                     </el-time-picker>
                 </el-form-item>
                 <el-form-item label="" prop="task_select_id_list" :inline="true":label-width="formLabelWidth">
@@ -58,11 +57,14 @@
                 history_dl_file_list:[],
 
                 form: {
-                    task_exce_time:'111',
+                    task_exce_time:'',
                     task_select_id_list:[],  //[1,2]
                 },
 
                 rules: {
+                    task_exce_time:[
+                        {required: true, message: '请输入计划时间', trigger: 'blur'},
+                    ],
                 },
 
                 formLabelWidth: '100px',
@@ -149,6 +151,7 @@
 
 
                 var params = {
+                    task_exce_time:self.form.task_exce_time,
                     task_select_id_list:self.form.task_select_id_list,
                     task_select_list:task_select_list,
                 };
