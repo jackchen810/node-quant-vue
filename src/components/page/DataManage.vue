@@ -57,7 +57,7 @@
                 history_dl_file_list:[],
 
                 form: {
-                    task_exce_time:'',
+                    task_exce_time:new Date(),
                     task_select_id_list:[],  //[1,2]
                 },
 
