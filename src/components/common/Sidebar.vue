@@ -131,7 +131,7 @@
                         subs: [
                             {
                                 index: '/data/manage',
-                                title: '数据管理'
+                                title: '计划列表'
                             },
                             {
                                 index: '/history/data',
