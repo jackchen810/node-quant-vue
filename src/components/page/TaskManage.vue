@@ -387,7 +387,7 @@
             },
             getBindMarket: function(){//获取绑定的行情
                 var self = this;
-                self.$axios.post('/api/market/bindobj').then(function(res){
+                self.$axios.post('/api/market/get/bindobj').then(function(res){
                     if(res.data.ret_code == 0){
                         self.form.bind_market_gateway = res.data.extra;
                         self.form.market_gateway = res.data.extra;
