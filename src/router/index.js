@@ -33,7 +33,7 @@ export default new Router({
                     path: '/pushresultdetail',
                         component: resolve => require(['../components/page/PushResultDetail.vue'], resolve)     // vue-datasource组件
                 },
-                /////
+                /////交易系统管理
                 {
                     path: '/task/manage',
                     component: resolve => require(['../components/page/TaskManage.vue'], resolve)     // vue-datasource组件
@@ -52,17 +52,17 @@ export default new Router({
                 },
                 {
                     path: '/riskctrl/manage',
-                    component: resolve => require(['../components/page/RiskManage.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/RiskctrlManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
-                    path: '/trade/gateway',
-                    component: resolve => require(['../components/page/StrategyManage.vue'], resolve)     // vue-datasource组件
+                    path: '/order/gateway',
+                    component: resolve => require(['../components/page/OrderGatewayManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
                     path: '/market/gateway',
-                    component: resolve => require(['../components/page/StrategyManage.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/MarketGatewayManage.vue'], resolve)     // vue-datasource组件
                 },
-                /////
+                /////选股系统管理
                 {
                     path: '/select/strategy',
                     component: resolve => require(['../components/page/SelectStrategy.vue'], resolve)     // vue-datasource组件
@@ -75,7 +75,7 @@ export default new Router({
                     path: '/select/result',
                     component: resolve => require(['../components/page/SelectResult.vue'], resolve)     // vue-datasource组件
                 },
-                /////
+                /////回测系统管理
                 {
                     path: '/backtest/manage',
                     component: resolve => require(['../components/page/BacktestManage.vue'], resolve)     // vue-datasource组件
@@ -88,7 +88,7 @@ export default new Router({
                     path: '/backtest/result',
                     component: resolve => require(['../components/page/BacktestResult.vue'], resolve)     // vue-datasource组件
                 },
-                /////
+                /////历史数据管理
                 {
                     path: '/data/manage',
                     component: resolve => require(['../components/page/DataManage.vue'], resolve)     // vue-datasource组件

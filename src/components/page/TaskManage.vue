@@ -252,7 +252,7 @@
                         self.task_list = res.data.extra.slice(0,10);
                     }
                     else{
-                        self.task_list = []
+                        self.task_list = [];
                     }
                 })
             },

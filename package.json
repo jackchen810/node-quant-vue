@@ -24,6 +24,7 @@
         "vue-router": "^2.3.1",
         "vue-schart": "^0.1.2",
         "vue-simplemde": "0.3.8",
+        "echarts": "^4.0.3",
         "chalk": "*"
     },
     "devDependencies": {

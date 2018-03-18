@@ -28,33 +28,41 @@
                     {
                         icon: 'el-icon-menu',
                         index: '2',
-                        title: '渠道管理',
+                        title: '测试管理',
                         subs: [
                             {
-                                index: 'basetable',
-                                title: '渠道列表'
+                                index: '/basetable',
+                                title: '测试'
                             },
-                        ]
-                    },
-                    {
-                        icon: 'el-icon-upload',
-                        index: '3',
-                        title: '批量执行任务',
-                        subs: [
-                            {
-                                index: 'setpush',
-                                title: '发起推送'
-                            },
-                            {
-                                index: 'pushresult',
-                                title: '推送结果'
-                            }
                         ]
                     },
 		            {
                         icon: 'el-icon-date',
+                        index: '3',
+                        title: '系统管理',
+                        subs: [
+                            {
+                                index: '/strategy/manage',
+                                title: '策略列表'
+                            },
+                            {
+                                index: '/riskctrl/manage',
+                                title: '风控列表'
+                            },
+                            {
+                                index: '/order/gateway',
+                                title: '交易接口列表'
+                            },
+                            {
+                                index: '/market/gateway',
+                                title: '行情接口列表'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-date',
                         index: '4',
-                        title: '交易系统管理',
+                        title: '交易任务管理',
                         subs: [
                             {
                                 index: '/task/manage',
@@ -68,22 +76,6 @@
                                 index: '/task/buysell',
                                 title: '买卖点统计'
                             },
-                            {
-                                index: '/strategy/manage',
-                                title: '策略列表'
-                            },
-                            {
-                                index: '/riskctrl/manage',
-                                title: '风控列表'
-                            },
-                            {
-                                index: '/trade/gateway',
-                                title: '交易接口列表'
-                            },
-                            {
-                                index: '/market/gateway',
-                                title: '行情接口列表'
-                            }
                         ]
                     },
                     {

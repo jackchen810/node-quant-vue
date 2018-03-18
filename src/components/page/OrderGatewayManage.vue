@@ -2,16 +2,16 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-star-on"></i> 策略管理</el-breadcrumb-item>
-                <el-breadcrumb-item>策略列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-star-on"></i> 交易接口管理</el-breadcrumb-item>
+                <el-breadcrumb-item>交易接口列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建交易策略</el-button>
+            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建交易接口</el-button>
         </div>
-        <el-table :data="strategy_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column prop="file_name" label="策略名称" width="250"></el-table-column>
-            <el-table-column prop="alias_name" label="策略中文名称" width="400"></el-table-column>
+        <el-table :data="order_gateway_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
+            <el-table-column prop="file_name" label="交易接口名称" width="250"></el-table-column>
+            <el-table-column prop="alias_name" label="交易接口中文名称" width="400"></el-table-column>
             <el-table-column prop="comment" label="备注" width="400"></el-table-column>
         </el-table>
         <div class="pagination">
@@ -23,7 +23,7 @@
             </el-pagination>
         </div>
 
-        <el-dialog title="添加交易策略" :visible.sync="dialogFormVisible" class="digcont">
+        <el-dialog title="添加交易接口" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form" :rules="rules" ref="form">
                 <el-form-item label="上传" :label-width="formLabelWidth">
                     <el-upload
@@ -39,7 +39,7 @@
                         <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="策略名称" prop=alias_name :label-width="formLabelWidth">
+                <el-form-item label="交易接口名称" prop=alias_name :label-width="formLabelWidth">
                     <el-input v-model="form.alias_name" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="备注说明" prop="comment" :label-width="formLabelWidth">
@@ -51,6 +51,7 @@
                 <el-button type="primary" @click="saveAdd('form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
             </div>
         </el-dialog>
+
     </div>
 </template>
 
@@ -75,36 +76,36 @@
                 dialogFormVisible:false,
                 fullscreenLoading: false,
                 upload_filelist: [],
-                strategy_list:[],
-                strategy_file_list:[],
+                order_gateway_list:[],
+                order_gateway_file_list:[],
 
                 pageTotal:0,
                 currentPage:1
             }
         },
         created: function(){
-            this.getStrategyList();
+            this.getOrderGatewayList();
         },
         methods: {
-            getStrategyList: function(){//获取rom列表
+            getOrderGatewayList: function(){//获取设备类型
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/strategy/list').then(function(res){
+                self.$axios.post('/api/order/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.pageTotal = res.data.extra.length;
-                        self.strategy_file_list = res.data.extra.slice(0,10);
-                        for(var i=0;i<self.strategy_file_list.length;i++){
+                        self.order_gateway_file_list = res.data.extra.slice(0,10);
+                        for(var i=0;i<self.order_gateway_file_list.length;i++){
                             var obj = {
-                                'file_name':self.strategy_file_list[i],
-                                'alias_name':self.strategy_file_list[i],
+                                'file_name':self.order_gateway_file_list[i],
+                                'alias_name':self.order_gateway_file_list[i],
                                 'comment': '',
                             }
-                            self.strategy_list.push(obj);
+                            self.order_gateway_list.push(obj);
                         }
                     }
                     else{
-                        self.strategy_file_list = [];
+                        self.order_gateway_file_list = [];
                         console.log('resp:', res.data);
                     }
                 });
@@ -123,11 +124,11 @@
                 this.fullscreenLoading  = false;
                 this.$message('创建成功');
                 this.dialogFormVisible = false;
-                this.getStrategyList();
+                this.getOrderGatewayList();
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
-                this.getStrategyList();
+                this.getOrderGatewayList();
             },
 
         },
