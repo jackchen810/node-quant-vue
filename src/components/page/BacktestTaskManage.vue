@@ -7,10 +7,7 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogMarketVisible=true">绑定行情接口</el-button>
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建任务</el-button>
-            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当前绑定的行情接口：</span>
-            <span v-text="form.bind_market_gateway"></span>
         </div>
         <el-table :data="task_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
@@ -20,10 +17,9 @@
             -->
             <el-table-column prop="task_type" label="任务类型" width="80"></el-table-column>
             <el-table-column prop="trade_trigger" label="K线类型" width="80"></el-table-column>
-            <el-table-column prop="market_gateway" label="行情接口" width="160"></el-table-column>
             <el-table-column prop="strategy_name" label="策略标的" width="160"></el-table-column>
-            <el-table-column prop="riskctrl_name" label="风控名称" width="160"></el-table-column>
-            <el-table-column prop="order_gateway" label="交易接口" width="160"></el-table-column>
+            <el-table-column prop="start_time" label="开始时间" width="160"></el-table-column>
+            <el-table-column prop="end_time" label="结束时间" width="160"></el-table-column>
             <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>
             <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
             <el-table-column prop="price" label="最新价" width="80"></el-table-column>
@@ -37,38 +33,19 @@
         </el-table>
         <div class="pagination">
             <el-pagination
-                    @current-change ="handleCurrentChange"
-                    :current-page="currentPage"
-                    layout="prev, pager, next"
-                    :total="pageTotal">
+                @current-change ="handleCurrentChange"
+                :current-page="currentPage"
+                layout="prev, pager, next"
+                :total="pageTotal">
             </el-pagination>
         </div>
-        <el-dialog title="绑定行情接口" :visible.sync="dialogMarketVisible" class="digmarket">
-            <el-form :model="form" :rules="rules" ref="form">
-                <el-form-item label="行情接口" prop="market_gateway" :label-width="formLabelWidth">
-                    <el-select v-model="form.market_gateway" placeholder="请选择对应行情接口">
-                        <el-option
-                                v-for="item in market_gateway_file_list"
-                                :key="item"
-                                :label="item"
-                                :value="item">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogMarketVisible = false">退 出</el-button>
-                <el-button type="primary" @click="bindMarket(form.market_gateway)"v-loading.fullscreen.lock="fullscreenLoading">确 定</el-button>
-            </div>
-        </el-dialog>
-        <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digcont" v-if="form.market_gateway != ''" >
+        <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digcont" v-if="true" >
             <el-form :model="form" :rules="rules" ref="form">
                 <el-form-item label="策略名称" prop="strategy_list" :label-width="formLabelWidth"
-                    v-for="(item, index) in form.strategy_list"
-                    :label="'策略' + index"
-                    :key="item.key"
-                    :prop="item.key"
-                    >
+                              v-for="(item, index) in form.strategy_list"
+                              :label="'策略' + index"
+                              :key="item.key"
+                              :prop="item.key">
                     <div class="block">
                         <label>股票代码：</label>
                         <el-input v-model="form.strategy_list[index].stock_symbol" class="inp150" auto-complete="off" placeholder="请输入股票代码" @change="changeStockSymbol(index)"></el-input>
@@ -97,10 +74,10 @@
                         <label>对应策略：</label>
                         <el-select v-model="form.strategy_list[index].strategy_name" class="inp180" placeholder="请选择对应策略">
                             <el-option
-                                    v-for="item in strategy_file_list"
-                                    :key="item"
-                                    :label="item"
-                                    :value="item">
+                                v-for="item in strategy_file_list"
+                                :key="item"
+                                :label="item"
+                                :value="item">
                             </el-option>
                         </el-select>
                         <el-button v-if="index==0&&form.strategy_type==1" :disabled="true">N</el-button>
@@ -115,25 +92,22 @@
                         <el-radio label="3">综合分析策略（策略0为主策略）</el-radio>
                     </el-radio-group>
                 </el-form-item>
-                 <el-form-item label="风控名称" prop="riskctrl_name" :label-width="formLabelWidth">
-                    <el-select v-model="form.riskctrl_name" placeholder="请选择对应风控">
-                        <el-option
-                            v-for="item in riskctrl_file_list"
-                            :key="item"
-                            :label="item"
-                            :value="item">
-                        </el-option>
-                    </el-select>
+                <el-form-item label="开始时间" prop="start_time" :label-width="formLabelWidth">
+                    <el-date-picker
+                        v-model="start_time"
+                        align="right"
+                        type="date"
+                        placeholder="选择日期"
+                        :picker-options="pickerOptions">
+                    </el-date-picker>
                 </el-form-item>
-                <el-form-item label="交易接口" prop="order_gateway" :label-width="formLabelWidth">
-                    <el-select v-model="form.order_gateway" placeholder="请选择对应交易接口">
-                        <el-option
-                            v-for="item in order_gateway_file_list"
-                            :key="item"
-                            :label="item"
-                            :value="item">
-                        </el-option>
-                    </el-select>
+                <el-form-item label="结束时间" prop="end_time" :label-width="formLabelWidth">
+                    <el-date-picker
+                        v-model="end_time"
+                        align="right"
+                        type="date"
+                        placeholder="选择日期">
+                    </el-date-picker>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -156,6 +130,38 @@
     export default {
         data: function(){
             return {
+
+                pickerOptions: {
+                    shortcuts: [{
+                        text: '最近一周',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: '最近一个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: '最近三个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }]
+                },
+                start_time: '',
+                end_time: '',
+
+
                 dialogFormVisible:false,
                 dialogMarketVisible:false,
                 dialogCheckVisible:false,
@@ -179,18 +185,17 @@
                         trade_amount:'',
                         strategy_name:'',
                     }],
-                    riskctrl_name: '',
-                    order_gateway: '',
+                    start_time: '',
+                    end_time: '',
                     market_gateway: '',
-                    bind_market_gateway: ''
                 },
 
                 rules: {
-                    riskctrl_name:[
-                        {required: true, message: '请输入风控名称', trigger: 'blur'},
+                    start_time:[
+                        {required: true, message: '请输入开始时间', trigger: 'blur'},
                     ],
-                    order_gateway:[
-                        {required: true, message: '请输入交易接口', trigger: 'blur'}
+                    end_time:[
+                        {required: true, message: '请输入结束时间', trigger: 'blur'}
                     ],
                 },
                 log:{
@@ -205,7 +210,7 @@
                 task_list:[],
                 strategy_file_list:[],
                 riskctrl_file_list:[],
-                order_gateway_file_list:[],
+                end_time_file_list:[],
                 market_gateway_file_list:[],
                 valid_stock_list:[],
 
@@ -222,10 +227,6 @@
             this.getTaskList();
             //this.getTaskPrice();
             this.getStrategyList();
-            this.getRiskCtrlList();
-            this.getOrderGatewayList();
-            this.getMarketGatewayList();
-            this.getBindMarket();
 
             //this.getValidStockList();
         },
@@ -241,7 +242,7 @@
             getTaskList: function(){//获取task列表
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/task/list').then(function(res){
+                self.$axios.post('/api/backtest/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.pageTotal = res.data.extra.length;
@@ -280,7 +281,7 @@
                     }
                 })
                 console.log(this.$route.path )
-                if ( this.$route.path == '/task/manage' ) {
+                if ( this.$route.path == '/backtest/manage' ) {
                     this.tiemout = setTimeout(() => {
                         //this.getTaskPrice();
                     }, 5000);
@@ -294,45 +295,6 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.strategy_file_list = res.data.extra;
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-            },
-            getRiskCtrlList: function(){//获取设备类型
-                var self = this;
-                self.loading = true;
-                self.$axios.post('/api/riskctrl/list').then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.riskctrl_file_list = res.data.extra;
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-            },
-            getOrderGatewayList: function(){//获取设备类型
-                var self = this;
-                self.loading = true;
-                self.$axios.post('/api/order/list').then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.order_gateway_file_list = res.data.extra;
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-            },
-            getMarketGatewayList: function(){//获取设备类型
-                var self = this;
-                self.loading = true;
-                self.$axios.post('/api/market/list').then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.market_gateway_file_list = res.data.extra;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -368,18 +330,6 @@
                     }
                 })
             },
-            getBindMarket: function(){//获取绑定的行情
-                var self = this;
-                self.$axios.post('/api/market/get/bindobj').then(function(res){
-                    if(res.data.ret_code == 0){
-                        self.form.bind_market_gateway = res.data.extra;
-                        self.form.market_gateway = res.data.extra;
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-            },
             beforeUpload: function(file){
                 console.log(file);
                 this.form.file_name = file.name;
@@ -397,25 +347,6 @@
                 self.fullscreenLoading  = false;
             },
 
-            bindMarket: function(file_name) {
-                var self = this;
-                var params = {
-                    file_name:file_name,
-                    is_bind:'true',
-                };
-                self.$axios.post('/api/market/bind', params).then(function(res){
-                    console.log(res);
-                    if(res.data.ret_code == 0){
-                        self.$message('绑定成功');
-                        self.dialogMarketVisible = false;
-                        self.form.bind_market_gateway = self.form.market_gateway;
-                    }
-                    else{
-                        self.$message('绑定失败:' + res.data.extra);
-                    }
-                });
-            },
-
             saveAdd: function(formName){
                 var self = this;
 
@@ -425,13 +356,12 @@
                     //obj_amount:self.form.obj_amount,
                     strategy_type:self.form.strategy_type,
                     strategy_list:self.form.strategy_list,
-                    riskctrl_name:self.form.riskctrl_name,
-                    order_gateway:self.form.order_gateway,
-                    market_gateway:self.form.market_gateway
+                    start_time:self.form.start_time,
+                    end_time:self.form.end_time,
                 };
 
                 self.loading = true;
-                self.$axios.post('/api/task/add', params).then(function(res){
+                self.$axios.post('/api/backtest/add', params).then(function(res){
                     self.loading = false;
                     console.log(res);
                     if(res.data.ret_code == 0){
@@ -455,7 +385,7 @@
                     task_id: task_id
                 };
                 self.loading = true;
-                self.$axios.post('/api/task/del', params).then(function(res){
+                self.$axios.post('/api/backtest/del', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
@@ -477,7 +407,7 @@
                     task_id: task_id,
                 };
                 self.loading = true;
-                self.$axios.post('/api/task/start',params).then(function(res){
+                self.$axios.post('/api/backtest/start',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
@@ -499,7 +429,7 @@
                     task_id: task_id,
                 };
                 self.loading = true;
-                self.$axios.post('/api/task/stop', params).then(function(res){
+                self.$axios.post('/api/backtest/stop', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');

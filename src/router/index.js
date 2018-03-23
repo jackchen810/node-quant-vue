@@ -78,7 +78,7 @@ export default new Router({
                 /////回测系统管理
                 {
                     path: '/backtest/manage',
-                    component: resolve => require(['../components/page/BacktestManage.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/BacktestTaskManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
                     path: '/start/backtest',

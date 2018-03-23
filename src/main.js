@@ -7,6 +7,9 @@ import 'element-ui/lib/theme-default/index.css';    // 默认主题
  //import '../static/css/theme-green/index.css';       // 浅绿色主题
 import "babel-polyfill";
 
+//var echarts = import('echarts');
+//Vue.use(echarts);  //自定义vue全局组件use使用
+
 Vue.use(ElementUI);
 axios.defaults.withCredentials=true;
 
@@ -29,6 +32,7 @@ axios.defaults.withCredentials=true;
 
 
 Vue.prototype.$axios = axios;
+//Vue.prototype.$echarts = echarts;
 new Vue({
     router,
     render: h => h(App)

@@ -34,28 +34,6 @@
             <el-table-column prop="mac" label="指定MAC" width="160">
                 <template slot-scope="scope">{{scope.row.mac.length>1?scope.row.mac[0] + ' ···':scope.row.mac.toString()}}</template>
             </el-table-column>
-            <el-table-column prop="upgrade_mode" label="升级方式" width="100">
-                <template slot-scope="scope">
-                    <el-tag :type="scope.row.upgrade_mode == '1' ? 'warning' : 'success'" close-transition>{{scope.row.upgrade_mode == '1'?'实时自动':(scope.row.upgrade_mode == '2'?'用户自动':'定时自动')}}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column label="结果" width="150">
-                <el-table-column prop="success_count" label="成功">
-                    <template slot-scope="scope">
-                        <el-tag type="success">{{scope.row.success_count}}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="fail_count" label="失败">
-                    <template slot-scope="scope">
-                        <el-tag type="danger">{{scope.row.fail_count}}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="running_count" label="执行中">
-                    <template slot-scope="scope">
-                        <el-tag type="warning">{{scope.row.running_count}}</el-tag>
-                    </template>
-                </el-table-column>
-            </el-table-column>
             <el-table-column prop="operator_name" label="操作人" width="120"></el-table-column>
             <el-table-column label="详情">
                 <template slot-scope="scope">

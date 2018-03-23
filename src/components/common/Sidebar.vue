@@ -22,7 +22,7 @@
 <script>
     import global_ from 'components/common/Global';
     export default {
-        data() {
+        data: function() {
             return {
                 items: [
                     {
@@ -104,7 +104,7 @@
                         subs: [
                             {
                                 index: '/backtest/manage',
-                                title: '回测管理'
+                                title: '任务列表'
                             },
                             {
                                 index: '/start/backtest',
@@ -145,7 +145,7 @@
             },
         },
         mounted: function(){
-            this.data();
+            //this.data();
         },
     }
 </script>
