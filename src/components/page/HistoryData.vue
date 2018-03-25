@@ -2,73 +2,52 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-star-on"></i> 策略管理</el-breadcrumb-item>
-                <el-breadcrumb-item>策略列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-star-on"></i> 历史数据</el-breadcrumb-item>
+                <el-breadcrumb-item>数据列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建版本</el-button>
+            <el-form :model="form" :rules="rules" ref="form">
+                <el-form-item label="K线类型：" prop=stock_ktype :label-width="formLabelWidth">
+                    <el-select v-model="form.stock_ktype" class="inp160" placeholder="请选择K线周期">
+                        <el-option label="1分钟" value="1"></el-option>
+                        <el-option label="5分钟" value="5"></el-option>
+                        <el-option label="15分钟" value="15"></el-option>
+                        <el-option label="30分钟" value="30"></el-option>
+                        <el-option label="60分钟" value="60"></el-option>
+                        <el-option label="120分钟" value="120"></el-option>
+                        <el-option label="日线" value="day"></el-option>
+                        <el-option label="周线" value="week"></el-option>
+                        <el-option label="月线" value="month"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="股票名称：" prop="stock_symbol" :label-width="formLabelWidth">
+                    <el-input v-model="form.stock_symbol" class="inp160" auto-complete="off" placeholder="请输入股票代码" @change="changeStockSymbol()"></el-input>
+                    <span v-text="form.stock_name"></span>
+                </el-form-item>
+                <el-form-item label="" prop="stock_symbol" :label-width="formLabelWidth">
+                    <el-button type="primary" @click="getHistoryList('form')"v-loading.fullscreen.lock="fullscreenLoading">查看数据</el-button>
+                </el-form-item>
+
+            </el-form>
         </div>
-        <el-table :data="strategy_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column prop="appName" label="策略名称" width="170"></el-table-column>
-            <el-table-column prop="appDisplayName" label="策略中文名称" width="170"></el-table-column>
+        <el-table :data="history_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
+            <el-table-column prop="date" label="日期" width="180"></el-table-column>
+            <el-table-column prop="code" label="股票代码" width="110"></el-table-column>
+            <el-table-column prop="open" label="开盘价" width="110"></el-table-column>
+            <el-table-column prop="close" label="收盘价" width="110"></el-table-column>
+            <el-table-column prop="high" label="最高价" width="110"></el-table-column>
+            <el-table-column prop="low" label="最低价" width="110"></el-table-column>
+            <el-table-column prop="volume" label="成交量" width="120"></el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
-                @current-change ="handleCurrentChange"
-                layout="prev, pager, next"
-                :total="1000">
+                    @current-change ="handleCurrentChange"
+                    :current-page="currentPage"
+                    layout="prev, pager, next"
+                    :total="pageTotal">
             </el-pagination>
         </div>
-
-        <el-dialog title="添加ROM版本" :visible.sync="dialogFormVisible" class="digcont">
-            <el-form :model="form" :rules="rules" ref="form">
-                <el-form-item label="上传" :label-width="formLabelWidth">
-                    <el-upload
-                        class="upload-demo"
-                        ref="upload"
-                        name="file_name"
-                        action="http://api.rom.kunteng.org/rom/upload"
-                        :data="form"
-                        :beforeUpload="beforeUpload"
-                        :on-success="handleSuccess"
-                        :file-list="fileList3"
-                        :auto-upload="false">
-                        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                    </el-upload>
-                </el-form-item>
-                <el-form-item label="ROM版本号" prop=rom_version :label-width="formLabelWidth">
-                    <el-input v-model="form.rom_version" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="设备类型" prop="dev_type" :label-width="formLabelWidth">
-                    <el-select v-model="form.dev_type" placeholder="请选择对应设备型号">
-                        <el-option
-                            v-for="item in typeListData"
-                            :key="item"
-                            :label="item"
-                            :value="item">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="版本类型" prop="ver_type" :label-width="formLabelWidth">
-                    <el-select v-model="form.ver_type" placeholder="请选择版本类型">
-                        <el-option label="正式版本" value="正式版本"></el-option>
-                        <el-option label="测试版本" value="测试版本"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="MD5串码" prop="md5_value" :label-width="formLabelWidth">
-                    <el-input v-model="form.md5_value" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="备注说明" prop="comment" :label-width="formLabelWidth">
-                    <el-input v-model="form.comment" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveAdd('form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
-            </div>
-        </el-dialog>
-
     </div>
 </template>
 
@@ -87,11 +66,9 @@
                 radio3:'全部',
 
                 form: {
-                    file_name:'',
-                    rom_version:'',
-                    dev_type:'',
-                    ver_type: '',
-                    md5_value:'',
+                    stock_symbol:'000001',
+                    stock_ktype:'日线',
+                    stock_name:'平安银行',
                     comment:''
                 },
                 rules: {
@@ -109,61 +86,92 @@
                     ]
                 },
                 formLabelWidth: '120px',
-                fileList3: [],
                 loading:false,
                 fullscreenLoading: false,
-                strategy_list:[]
+                history_list:[],
 
+                pageTotal:0,
+                current_page:1,
+                page_size:10
             }
         },
         created: function(){
-            this.getStrategyList();
+            this.getHistoryList();
         },
         methods: {
-            getStrategyList: function(){//获取task列表
+            getHistoryListLength: function(){//获取task列表
                 var self = this;
+                var params = {
+                    stock_symbol: this.form.stock_symbol,
+                    stock_ktype: this.form.stock_ktype,
+                };
                 self.loading = true;
-                self.$axios.post('/api/strategy/list').then(function(res){
+                self.$axios.post('/api/history/list/length', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra.length;
-                        self.strategy_list = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.extra;
                     }
                     else{
-                        self.strategy_list = []
+                        self.pageTotal=0;
                     }
                 })
             },
-            beforeUpload: function(file){
-                console.log(file);
-                this.form.file_name = file.name;
-                return true;
+            getHistoryList: function(form){//获取task列表
+                var self = this;
+                var params = {
+                    stock_symbol: this.form.stock_symbol,
+                    stock_ktype: this.form.stock_ktype,
+                    stock_name: this.form.stock_name,
+                    page_size: this.page_size,
+                    current_page: this.current_page,
+                };
+                self.loading = true;
+                self.$axios.post('/api/history/list', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        //self.pageTotal = res.data.extra.length;
+                        self.history_list = res.data.extra.slice(0,10);
+                    }
+                    else{
+                        self.history_list = []
+                    }
+                })
             },
-            handleSuccess: function(response,file,fileList){
-                console.log(response);
-                this.fullscreenLoading  = false;
-                this.$message('创建成功');
-                this.dialogFormVisible = false;
-                this.getStrategyList();
-            },
-            handleError: function(response,file,fileList){
-                this.$message('操作失败');
-                self.fullscreenLoading  = false;
-            },
-            handleChange:function(file, fileList) {
-//                console.log(file,fileList);
-                this.form.file_name = file.name;
+            changeStockSymbol:function() {
+
+                var stock_symbol = this.form.stock_symbol;
+
+                //获取stock_symbol  对应的名称
+                if (stock_symbol.length != 6){
+                    this.form.stock_name = '';
+                    return;
+                }
+                var self = this;
+                var params = '';
+                if (stock_symbol[0] == '6') {
+                    params = '/sina/list=' + 'sh' + stock_symbol;
+                }else{
+                    params = '/sina/list=' + 'sz' + stock_symbol;
+                }
+                self.$axios.get(params).then(function(res){
+                    var data_substr = res.data.match(/\"(\S*)(?=\")/);
+                    if (data_substr == null) {
+                        return;
+                    }
+                    var fields = data_substr[1].split(",");
+                    self.form.stock_name = fields[0];
+                    this.getHistoryList();
+
+                },function(err){
+                    self.form.stock_name = '';
+                    console.log(err);
+                })
+
+
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
-                this.getStrategyList();
-            },
-            filterTag:function(value, row) {
-                return row.tag === value;
-            },
-            changePage:function(values) {
-                this.information.pagination.per_page = values.perpage;
-                this.information.data = this.information.data;
+                this.getHistoryListLength();
             },
         },
         computed:{
@@ -190,4 +198,6 @@
     .upload-demo .el-upload:hover {
         border-color: #409EFF;
     }
+    .inp180{width:180px;}
+    .inp160{width:160px;}
 </style>

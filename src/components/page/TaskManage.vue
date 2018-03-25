@@ -18,8 +18,8 @@
             <el-table-column prop="stock_name" label="股票名称" width="100"></el-table-column>
             <el-table-column prop="obj_amount" label="操作量" width="80"></el-table-column>
             -->
-            <el-table-column prop="task_type" label="任务类型" width="80"></el-table-column>
-            <el-table-column prop="trade_trigger" label="K线类型" width="80"></el-table-column>
+            <el-table-column prop="task_type" label="任务类型" width="100"></el-table-column>
+            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
             <el-table-column prop="market_gateway" label="行情接口" width="160"></el-table-column>
             <el-table-column prop="strategy_name" label="策略标的" width="160"></el-table-column>
             <el-table-column prop="riskctrl_name" label="风控名称" width="160"></el-table-column>

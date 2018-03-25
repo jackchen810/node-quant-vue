@@ -7,7 +7,7 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建任务</el-button>
+            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建回测任务</el-button>
         </div>
         <el-table :data="task_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
@@ -15,8 +15,8 @@
             <el-table-column prop="stock_name" label="股票名称" width="100"></el-table-column>
             <el-table-column prop="obj_amount" label="操作量" width="80"></el-table-column>
             -->
-            <el-table-column prop="task_type" label="任务类型" width="80"></el-table-column>
-            <el-table-column prop="trade_trigger" label="K线类型" width="80"></el-table-column>
+            <el-table-column prop="task_type" label="任务类型" width="100"></el-table-column>
+            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
             <el-table-column prop="strategy_name" label="策略标的" width="160"></el-table-column>
             <el-table-column prop="start_time" label="开始时间" width="160"></el-table-column>
             <el-table-column prop="end_time" label="结束时间" width="160"></el-table-column>
@@ -92,18 +92,18 @@
                         <el-radio label="3">综合分析策略（策略0为主策略）</el-radio>
                     </el-radio-group>
                 </el-form-item>
-                <el-form-item label="开始时间" prop="start_time" :label-width="formLabelWidth">
+                <el-form-item label="开始日期" prop="start_time" :label-width="formLabelWidth">
                     <el-date-picker
-                        v-model="start_time"
+                        v-model="form.start_time"
                         align="right"
                         type="date"
                         placeholder="选择日期"
                         :picker-options="pickerOptions">
                     </el-date-picker>
                 </el-form-item>
-                <el-form-item label="结束时间" prop="end_time" :label-width="formLabelWidth">
+                <el-form-item label="结束日期" prop="end_time" :label-width="formLabelWidth">
                     <el-date-picker
-                        v-model="end_time"
+                        v-model="form.end_time"
                         align="right"
                         type="date"
                         placeholder="选择日期">
@@ -189,8 +189,10 @@
                     end_time: '',
                     market_gateway: '',
                 },
-
                 rules: {
+                    start_time:[
+                        {required: true, message: '请输入开始时间', trigger: 'blur'},
+                    ],
                     start_time:[
                         {required: true, message: '请输入开始时间', trigger: 'blur'},
                     ],
@@ -230,16 +232,8 @@
 
             //this.getValidStockList();
         },
-        beforeDestroy: function(){
-            if ( this.tiemout ) {
-                clearTimeout(this.tiemout);
-                this.tiemout = '';
-            }
-
-            console.log('destory');
-        },
         methods: {
-            getTaskList: function(){//获取task列表
+            getTaskList: function(){//获取backtest task列表
                 var self = this;
                 self.loading = true;
                 self.$axios.post('/api/backtest/list').then(function(res){
@@ -252,41 +246,6 @@
                         self.task_list = [];
                     }
                 })
-            },
-            getTaskPrice: function(){//获取task列表
-                var self = this;
-                var stock_list = []
-                for (var i = 0; i < self.task_list.length; i++) {
-                    if (self.task_list[i].task_status == 'running'){
-                        stock_list.push({task_id:self.task_list[i].task_id, trade_symbol:self.task_list[i].trade_symbol})
-                    }
-                }
-
-                self.loading = false;
-                self.$axios.post('/api/stock/price', stock_list).then(function(res){
-                    if(res.data.ret_code == 0){
-                        //self.task_list = res.data.extra.slice(0,10);
-                        for (var i = 0; i < res.data.extra.length; i++) {
-                            var item = res.data.extra[i];
-                            for (var j = 0; j < self.task_list.length; j++) {
-                                if (item['trade_symbol'] == self.task_list[j]['trade_symbol']){
-                                    self.task_list[j]['price'] = item['price']
-                                    self.task_list[j]['volume'] = item['volume']
-                                }
-                            }
-                        }
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-                console.log(this.$route.path )
-                if ( this.$route.path == '/backtest/manage' ) {
-                    this.tiemout = setTimeout(() => {
-                        //this.getTaskPrice();
-                    }, 5000);
-                }
-
             },
             getStrategyList: function(){//获取rom列表
                 var self = this;
@@ -301,52 +260,6 @@
                     }
                 })
             },
-            getValidStockList: function(){//获取设备类型
-                var self = this;
-                self.loading = false;
-                self.$axios.post('/api/stock/list').then(function(res){
-                    //self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.valid_stock_list = res.data.extra;
-                    }
-                })
-            },
-            getStockName: function(){//获取设备类型
-                var self = this;
-                if (self.form.trade_symbol.length < 6){
-                    self.form.stock_name = '';
-                    return;
-                }
-
-                var params = {trade_symbol:self.form.trade_symbol}
-                self.loading = false;
-                self.$axios.post('/api/stock/name', params).then(function(res){
-                    //self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.form.stock_name = res.data.extra;
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-            },
-            beforeUpload: function(file){
-                console.log(file);
-                this.form.file_name = file.name;
-                return true;
-            },
-            handleSuccess: function(response,file,fileList){
-                console.log(response);
-                this.fullscreenLoading  = false;
-                this.$message('创建成功');
-                this.dialogFormVisible = false;
-                this.getTaskList();
-            },
-            handleError: function(response,file,fileList){
-                this.$message('操作失败');
-                self.fullscreenLoading  = false;
-            },
-
             saveAdd: function(formName){
                 var self = this;
 
