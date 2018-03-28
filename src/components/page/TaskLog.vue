@@ -34,24 +34,39 @@
                 loading:false,
                 fullscreenLoading: false,
                 listData:[],
-                pageTotal:0,
-                currentPage:1
+
+                pageTotal:1,
+                current_page:1,
+                page_size:10
 
             }
         },
         created: function(){
-            this.getData({});
+            this.getData(1, this.page_size);
+            this.getDataLength();
         },
         methods: {
-            getData: function(params){//获取rom列表
+            getDataLength: function(){//获取task列表
                 var self = this;
                 self.loading = true;
+                self.$axios.post('/api/log/list/length').then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.pageTotal = res.data.extra;
+                    }
+                });
+            },
+            getData: function(current_page, page_size){//获取rom列表
+                var self = this;
+                var params = {
+                    page_size: page_size,
+                    current_page: current_page,
+                };
+                self.loading = true;
                 self.$axios.post('/api/log/list', params).then(function(res){
-//                    console.log(res);
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.extra.length;
                             self.listData = res.data.extra.slice(0,10);
                         }else{
                             self.listData = res.data.extra;
@@ -61,15 +76,11 @@
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
-                console.log(this.radio3, this.currentPage);
-                this.getData({page_size:10,current_page:this.currentPage});
+                this.getData(this.currentPage, this.page_size);
+                //this.getDataLength();
             },
             filterTag:function(value, row) {
                 return row.comment === value;
-            },
-            changePage:function(values) {
-                this.information.pagination.per_page = values.perpage;
-                this.information.data = this.information.data;
             },
         },
         computed:{

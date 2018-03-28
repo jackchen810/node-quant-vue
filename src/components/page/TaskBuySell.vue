@@ -2,25 +2,21 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-document"></i> 脚本管理</el-breadcrumb-item>
-                <el-breadcrumb-item>脚本列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-upload"></i> 交易任务管理</el-breadcrumb-item>
+                <el-breadcrumb-item>买卖点统计</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box" v-if="isShow">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传脚本</el-button>
-        </div>
-        <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column prop="script_name" label="脚本名称" width="380"></el-table-column>
-            <!--<el-table-column prop="script_version" label="版本号" width="150"></el-table-column>-->
-            <el-table-column prop="script_developer" label="开发者" width="110"></el-table-column>
-            <el-table-column prop="script_create_time" label="上传时间" width="150"></el-table-column>
-            <el-table-column prop="script_info" label="脚本说明"></el-table-column>
-            <el-table-column label="操作" v-if="isShow">
-                <template slot-scope="scope">
-                    <el-button type="success" size="small" @click="downloadScript(scope.row.script_name)">下载</el-button>
-                    <el-button type="danger" size="small" @click="delScript(scope.row.script_name)">删除</el-button>
-                </template>
-            </el-table-column>
+
+        <el-table :data="result_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
+            <el-table-column type="index" label="ID" width="60"></el-table-column>
+            <el-table-column prop="trade_symbol" label="股票代码" width="100"></el-table-column>
+            <el-table-column prop="symbol_name" label="股票名称" width="100"></el-table-column>
+            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
+            <el-table-column prop="strategy_name" label="交易策略" width="160"></el-table-column>
+            <el-table-column prop="order_point_at" label="买卖点时间" width="180"></el-table-column>
+            <el-table-column prop="order_type" label="买卖点类型" width="160"></el-table-column>
+            <el-table-column prop="trade_price" label="交易价格" width="100"></el-table-column>
+            <el-table-column prop="trade_amount" label="交易数量" width="100"></el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
@@ -31,323 +27,82 @@
             </el-pagination>
         </div>
 
-        <el-dialog title="添加脚本文件" :visible.sync="dialogFormVisible" class="digcont">
-            <el-form :model="form" :rules="rules" ref="form">
-                <el-form-item label="上传脚本" :label-width="formLabelWidth">
-                    <el-upload
-                        class="upload-demo"
-                        ref="upload"
-                        name="file_name"
-                        :action="uploadUrl"
-                        with-credentials="true"
-                        :data="form"
-                        :beforeUpload="beforeUpload"
-                        :on-change="handleChange"
-                        :on-success="handleSuccess"
-                        :file-list="fileList"
-                        :auto-upload="false">
-                        <el-button size="small" type="primary">选择文件</el-button>
-                    </el-upload>
-                </el-form-item>
-                <el-form-item label="脚本名称" :label-width="formLabelWidth">
-                    <el-input v-model="form.script_name" class="diainp" :disabled="true" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="MD5串码" prop="script_md5" :label-width="formLabelWidth">
-                    <el-input v-model="form.script_md5" class="diainp" :disabled="true" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="脚本说明" prop="script_info" :label-width="formLabelWidth">
-                    <el-input v-model="form.script_info" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="开发者" :label-width="formLabelWidth">
-                    <el-input v-model="form.script_developer" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveAdd('form')" v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
-            </div>
-        </el-dialog>
-
     </div>
 </template>
 
 <script>
     import global_ from 'components/common/Global';
-    var crypto = require('crypto');
     export default {
-        data: function() {
+        data: function(){
+            const self = this;
             return {
-                uploadUrl:global_.baseUrl+'/script/upload',
-                isShow:localStorage.getItem('userMsg') =='1'?false:true,
-                currentPage: 1,
-                pageTotal:0,
-                dialogFormVisible: false,
-                form: {
-                    file_name:'',
-                    script_name:'',
-                    script_developer:'',
-                    script_info:'',
-                    script_md5:''
-                },
-                rules: {
-                    script_name:[
-                        {required: true, message: '请选择脚本', trigger: 'blur'}
-                    ],
-                    script_info:[
-                        {required: true, message: '请输入脚本相关信息', trigger: 'blur'},
-                        {validator:this.validateSpace,trigger:'blur'}
-                    ]
-                },
-                formLabelWidth: '120px',
-                showDialog:false,
-                radiotoRout:'文件上传',
-                fileList:[],
-                fullscreenLoading:false,
-                listData:[],
-                loading:false
+                search_word:'',
+                result_list:[],
+
+                loading:true,
+
+                pageTotal:1,
+                currentPage:1,
+                page_size:10
+
             }
         },
-        created: function(){
-            this.getData({});
+        created:function(){
+            this.getTradePointList(1, this.page_size);
+            this.getTradePointListLength();
         },
         methods: {
-            getData: function(params){
+            getTradePointListLength: function(){//获取task列表
                 var self = this;
+                var params = {
+                    stock_symbol: this.form.stock_symbol,
+                    stock_ktype: this.form.stock_ktype,
+                };
                 self.loading = true;
-                self.$axios.post(global_.baseUrl+'/script/list',params).then(function(res){
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
+                self.$axios.post('/api/trade/point/list/length', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.extra.length;
-                            self.listData = res.data.extra.slice(0,10);
-                        }else{
-                            self.listData = res.data.extra;
-                        }
-                    }else{
-                        self.$message.error(res.data.extra)
+                        self.pageTotal = res.data.extra;
                     }
                 })
             },
-            handlePreview:function(file) {
-                console.log(file);
-            },
-            beforeUpload: function(file){
-                // this.form.script_name = file.name;
-                // this.form.file_name = file.name;
-                return true;
-            },
-            handleSuccess: function(response,file,fileList){
-                var self = this;
-                this.fullscreenLoading  = false;
-                this.dialogFormVisible = false;
-                self.form.file_name = '';
-                self.form.script_name = '';
-                self.form.script_developer = '';
-                self.form.script_info = '';
-                self.form.script_md5 = '';
-                if(response.ret_code == '1001'){
-                    self.$message({message:response.extra,type:'warning'});
-                    setTimeout(function(){
-                        self.$router.replace('login');
-                    },2000)
-                }
-                if(response.ret_code == 0){
-                    this.$message({message:'创建成功',type:'success'});
-                    this.getData({});
-                }else{
-                    this.$message.error('创建失败');
-                }
-
-            },
-            handleError: function(response,file,fileList){
-                this.$message('操作失败');
-                this.fullscreenLoading  = false;
-            },
-            handleChange:function(file, fileList) {
-                var self = this;
-                this.form.script_name = file.name;
-                var reader=new FileReader();
-                reader.onload=function(f){
-                    var md5sum = crypto.createHash('md5');
-                    //md5sum.update(String.fromCharCode.apply(null, this.result));
-                    md5sum.update(this.result, 'binary');
-                    //console.log('dd:', this.result);
-                    var str = md5sum.digest('hex');
-                    self.form.script_md5 = str;
-                }
-                //reader.readAsBinaryString(fileList[0]);
-                reader.readAsBinaryString(file.raw);
-            },
-            saveAdd: function(formName){
-                var self = this;
-                self.$refs[formName].validate(function(valid){
-                    if(valid){
-                        // self.fullscreenLoading  = true;
-                        self.$refs.upload.submit();
-                    }else{
-                        return false;
-                        console.log('验证失败');
-                    }
-                });
-            },
-            validateSpace: function (rule, value, callback) {
-                var self = this;
-                if(value.indexOf(' ')>=0){
-                    callback(new Error('输入有空格'));
-                }else{
-                    callback();
-                }
-            },
-            downloadScript: function(fileName){//下载
+            getTradePointList: function(current_page, page_size){//获取backtest task列表
                 var self = this;
                 var params = {
-                    script_name:fileName
+                    filter: {task_id: self.getTaskId},
+                    page_size: page_size,
+                    current_page: current_page,
                 };
                 self.loading = true;
-                self.$axios.defaults.timeout = 25000;
-                self.$axios.post(global_.baseUrl+'/script/download',params).then(function(res){
+                self.$axios.post('/api/trade/point/list', params).then(function(res){
                     self.loading = false;
-                    if(res.status == 200){
-                        var blob = new Blob([res.data]);
-                        var reader = new FileReader();
-                        reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
-                        reader.onload = function (e) {
-                            // 转换完成，创建一个a标签用于下载
-                            var a = document.createElement('a');
-                            a.download = fileName;
-                            a.href = e.target.result;
-                            // $("body").append(a);
-                            // a.click();
-                            // $(a).remove();
-                            document.body.appendChild(a);  // 修复firefox中无法触发click
-                            a.click();
-                            document.body.removeChild(a);
-
-                        }
-                    }
-
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
                     if(res.data.ret_code == 0){
-                        self.$message({message:'下载成功',type:'success'});
-                        self.getData();
-                    }else{
-                        self.$message.error(res.data.extra)
+                        self.result_list = res.data.extra.slice(0,10);
                     }
-
-                },function(err){
-                    self.$message.error(res);
-                    self.loading = false;
-                    console.log(err);
-                })
-            },
-            delScript: function(fileName){//删除
-                var self = this;
-                var params = {
-                    script_name:fileName
-                };
-                self.loading = true;
-                self.$axios.post(global_.baseUrl+'/script/del',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
+                    else{
+                        self.result_list = [];
                     }
-                    if(res.data.ret_code == 0){
-                        self.$message({message:'删除成功',type:'success'});
-                        self.getData({});
-                    }else{
-                        self.$message.error(res.data.extra)
-                    }
-
-                },function(err){
-                    self.$message.error('删除失败');
-                    self.loading = false;
-                    // console.log(err);
-                })
-            },
-            releaseScript: function(fileName){//上架操作
-                var self = this;
-                var params = {
-                    script_name:fileName
-                };
-                self.loading = true;
-                self.$axios.post(global_.baseUrl+'/script/release',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == 0){
-                        self.$message({message:'操作成功',type:'success'});
-                        self.getData({});
-                    }else{
-                        self.$message.error(res.data.extra)
-                    }
-
-                },function(err){
-                    self.$message.error('操作失败');
-                    self.loading = false;
-                    console.log(err);
-                })
-            },
-            revokeScript: function(fileName){//下架操作
-                var self = this;
-                var params = {
-                    script_name:fileName
-                };
-                self.loading = true;
-                self.$axios.post(global_.baseUrl+'/script/revoke',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == 0){
-                        self.$message({message:'操作成功',type:'success'});
-                        self.getData({});
-                    }else{
-                        self.$message.error(res.data.extra)
-                    }
-
-                },function(err){
-                    self.$message.error('操作失败');
-                    self.loading = false;
-                    console.log(err);
                 })
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
-                this.getData({page_size:10,current_page:this.currentPage});
+                this.getTradePointList(this.currentPage, this.page_size);
+            },
+        },
+        computed:{
+            getTaskId(){
+                //因为在main.js中已经全局注册了store，所以这里直接用this.$直接使用。
+                return this.$route.params.task_id;
             }
         }
     }
 </script>
-
-<style scoped>
-    .handle-box{margin-bottom: 20px;}
-    .handle-select{width: 120px;}
-    .handle-input{width: 300px;display: inline-block;}
+<style>
+    .demo-table-expand {  font-size: 0;  }
+    .demo-table-expand label {  width: 90px;  color: #99a9bf;}
+    .demo-table-expand .el-form-item {  margin-right: 0;  margin-bottom: 0;  width: 33%;  }
     .rad-group{margin-bottom:20px;}
-    .btn1{margin-bottom:5px;margin-top:5px;margin-left:0;}
-    .diainp{width:217px;}
-    .diainp2{width:400px;}
-    .upload-demo{}
+    .handle-input{  width: 300px;  display: inline-block;  }
+    .handle-box2{display:inline-block;float:right;}
+    .pagecont{margin-top:30px;}
 </style>
-

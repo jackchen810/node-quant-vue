@@ -2,44 +2,23 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-upload"></i> 批量执行任务</el-breadcrumb-item>
-                <el-breadcrumb-item>推送结果</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-upload"></i> 回测任务管理</el-breadcrumb-item>
+                <el-breadcrumb-item>回测结果</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class='rad-group'>
-            <el-radio-group v-model="curRadio" @change="changeTab">
-                <el-radio-button label="firmware">ROM升级</el-radio-button>
-                <el-radio-button label="apps">插件升级</el-radio-button>
-                <el-radio-button label="script">脚本推送</el-radio-button>
-            </el-radio-group>
-            <el-form :inline="true" class="handle-box2">
-                <el-form-item label="">
-                    <el-input v-model="search_word" placeholder="请输入设备MAC"></el-input>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="search">搜索</el-button>
-                </el-form-item>
-            </el-form>
-        </div>
 
-        <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column prop="request_msg" label="操作" width="120">
-                <template slot-scope="scope">
-                    <!--<el-tag>{{JSON.parse(scope.row.request_msg).item == 'sysinfo'?'ROM升级':'其他'}}</el-tag>-->
-                    <el-tag type="primary">{{curRadio == 'firmware'?'ROM升级':(curRadio == 'apps'?'插件升级':'脚本升级')}}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column prop="request_timestamp" sortable label="时间" width="170"></el-table-column>
-            <el-table-column prop="_id" label="任务ID" width="320"></el-table-column>
-            <el-table-column prop="mac" label="指定MAC" width="160">
-                <template slot-scope="scope">{{scope.row.mac.length>1?scope.row.mac[0] + ' ···':scope.row.mac.toString()}}</template>
-            </el-table-column>
-            <el-table-column prop="operator_name" label="操作人" width="120"></el-table-column>
-            <el-table-column label="详情">
-                <template slot-scope="scope">
-                    <el-button class="btn1" type="info" size="small" @click="goDetail(scope.row._id)">详情</el-button>
-                </template>
-            </el-table-column>
+        <el-table :data="result_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
+            <el-table-column type="index" label="ID" width="60"></el-table-column>
+            <el-table-column prop="trade_symbol" label="股票代码" width="100"></el-table-column>
+            <el-table-column prop="symbol_name" label="股票名称" width="100"></el-table-column>
+            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
+            <el-table-column prop="strategy_name" label="交易策略" width="160"></el-table-column>
+            <el-table-column prop="order_point_at" label="买卖点时间" width="180"></el-table-column>
+            <el-table-column prop="order_type" label="买卖点类型" width="160"></el-table-column>
+            <el-table-column prop="trade_price" label="交易价格" width="100"></el-table-column>
+            <el-table-column prop="trade_amount" label="交易数量" width="100"></el-table-column>
+            <el-table-column prop="profit_rate" label="收益率" width="100"></el-table-column>
+            <el-table-column prop="max_retracement" label="最大回撤率" width="120"></el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
@@ -59,153 +38,66 @@
         data: function(){
             const self = this;
             return {
-                curRadio:'firmware',
                 search_word:'',
-                listData:[],
-                pageTotal:0,
+                result_list:[],
+
+                loading:true,
+
+                pageTotal:1,
                 currentPage:1,
-                loading:true
+                page_size:10
 
             }
         },
         created:function(){
-            this.getFirmwareData({});
+            this.getBacktestResultList(1, this.page_size);
+            this.getBacktestResultListLength();
         },
         methods: {
-            getFirmwareData: function(params){
+            getBacktestResultListLength: function(){//获取task列表
                 var self = this;
-                self.$axios.post(global_.baseUrl+'/task/list/sysupgrade',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.extra.length;
-                            self.listData = res.data.extra.slice(0,10);
-                        }else{
-                            self.listData = res.data.extra;
-                        }
-                    }
-                },function(err){
-                    self.loading = false;
-                    console.log(err);
-                });
-            },
-            getAppsData: function(params){
-                var self = this;
-                self.$axios.post(global_.baseUrl+'/manage/apps_result',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.extra.length;
-                            self.listData = res.data.extra.slice(0,10);
-                        }else{
-                            self.listData = res.data.extra;
-                        }
-                    }else{
-                        self.$message.error(res.data.extra)
-                    }
-                },function(err){
-                    self.loading = false;
-                    console.log(err);
-                });
-            },
-            getScriptData: function(params){
-                var self = this;
-                self.$axios.post(global_.baseUrl+'/manage/script_result',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.extra.length;
-                            self.listData = res.data.extra.slice(0,10);
-                        }else{
-                            self.listData = res.data.extra;
-                        }
-                    }else{
-                        self.$message.error(res.data.extra)
-                    }
-                },function(err){
-                    self.loading = false;
-                    console.log(err);
-                });
-            },
-            changeTab: function(){
-                var self = this;
-                if(self.curRadio == 'firmware'){
-                    self.getFirmwareData({});
-                }
-                if(self.curRadio == 'apps'){
-                    self.getAppsData({});
-                }
-                if(self.curRadio == 'script'){
-                    self.getScriptData({});
-                }
-            },
-            handleCurrentChange:function(val){
-                var self = this;
-                self.currentPage = val;
                 var params = {
-                    page_size:10,current_page:this.currentPage
+                    stock_symbol: this.form.stock_symbol,
+                    stock_ktype: this.form.stock_ktype,
                 };
-                if(self.curRadio == 'firmware'){
-                    self.getFirmwareData(params);
-                }
-                if(self.curRadio == 'apps'){
-                    self.getAppsData(params);
-                }
-                if(self.curRadio == 'script'){
-                    self.getScriptData(params);
-                }
-
-            },
-            search: function(){
-                var self = this;
-                if(self.search_word == ''){
-                    self.$message({message:'输入不能为空',type:'warning'});
-                    return false;
-                }
                 self.loading = true;
-                var mac = self.search_word;
-                var str = (mac.indexOf(':')>=0?mac.replace(/:/g,''):mac).toUpperCase();
-                var params = {
-                    filter:{"mac":str}
-                };
-                var urlStr = self.curRadio=='firmware'?'/task/list/sysupgrade':(self.curRadio=='apps'?'/manage/apps_query':'/manage/script_detail_detail');
-                self.$axios.post(global_.baseUrl + urlStr,params).then(function(res){
+                self.$axios.post('/api/backtest/result/length', params).then(function(res){
                     self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
                     if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra.length;
-                        self.listData = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.extra;
                     }
                 })
-
             },
-            goDetail: function(id){
-                this.$router.push({path:'/pushresultdetail',query:{curid:id,curRadio:this.curRadio}});
-            }
+            getBacktestResultList: function(current_page, page_size){//获取backtest task列表
+                var self = this;
+                var params = {
+                    filter: {task_id: self.getTaskId},
+                    page_size: page_size,
+                    current_page: current_page,
+                };
+                self.loading = true;
+                self.$axios.post('/api/backtest/result', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.result_list = res.data.extra.slice(0,10);
+                    }
+                    else{
+                        self.result_list = [];
+                    }
+                })
+            },
+            handleCurrentChange:function(val){
+                this.currentPage = val;
+                this.getBacktestResultList(this.currentPage, this.page_size);
+                //this.getBacktestResultListLength();
+            },
         },
+        computed:{
+            getTaskId(){
+                //因为在main.js中已经全局注册了store，所以这里直接用this.$直接使用。
+                return this.$route.params.task_id;
+            }
+        }
     }
 </script>
 <style>

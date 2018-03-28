@@ -2,8 +2,8 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-star-on"></i>TASK管理</el-breadcrumb-item>
-                <el-breadcrumb-item>TASK列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-star-on"></i>回测任务管理</el-breadcrumb-item>
+                <el-breadcrumb-item>回测任务列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
@@ -22,12 +22,12 @@
             <el-table-column prop="end_time" label="结束时间" width="160"></el-table-column>
             <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>
             <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
-            <el-table-column prop="price" label="最新价" width="80"></el-table-column>
-            <el-table-column label="操作" width="120">
+            <el-table-column label="操作" width="200">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="delTask(scope.row.task_id)">删除</el-button>
                     <el-button class="btn1" type="danger" size="small" v-if="scope.row.task_status =='running'" @click="stopTask(scope.row.task_id)">停止</el-button>
                     <el-button class="btn1" type="success" size="small" v-else @click="startTask(scope.row.task_id)">启动</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="page_forward(scope.row.task_id)">查看结果</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -206,6 +206,7 @@
 
                 formLabelWidth: '100px',
                 formLabelWidth50: '50px',
+                updateTimer: '',
                 fileList3: [],
                 loading:false,
                 fullscreenLoading: false,
@@ -247,6 +248,41 @@
                     }
                 })
             },
+            getTaskStatusById: function(task_id){//获取backtest task列表
+                var self = this;
+                var params = {
+                    task_id:task_id,
+                };
+                self.loading = true;
+                self.$axios.post('/api/backtest/task/status', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        var taskList = res.data.extra;
+                        for (var i = 0; i <taskList.length; i++){
+                            if (taskList[i]['task_status'] != 'finish'){
+                                break;
+                            }
+                        }
+
+                        //都已经 finish
+                        if (i == taskList.length){
+                            //更新状态
+                            for (var i = 0; i <self.task_list.length; i++){
+                                if (self.task_list[i]['task_id'] == task_id){
+                                    self.task_list[i]['task_status'] = 'finish';
+                                }
+                            }
+                            return;
+                        }
+                    }
+
+                    self.task_list = [];
+                    self.updateTimer = setTimeout(function(){
+                        self.getTaskStatusById(task_id);
+                    },2000)
+
+                })
+            },
             getStrategyList: function(){//获取rom列表
                 var self = this;
                 self.loading = true;
@@ -265,8 +301,6 @@
 
                 var params = {
                     //trade_symbol:self.form.trade_symbol,
-                    //stock_name:self.form.stock_name,
-                    //obj_amount:self.form.obj_amount,
                     strategy_type:self.form.strategy_type,
                     strategy_list:self.form.strategy_list,
                     start_time:self.form.start_time,
@@ -325,6 +359,10 @@
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
                         self.getTaskList();
+                        //启动定时器，定时查询状态
+                        self.updateTimer = setTimeout(function(){
+                            self.getTaskStatusById(task_id);
+                        },2000)
                     }
                     else {
                         self.$message(res.data.extra);
@@ -347,6 +385,7 @@
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
                         self.getTaskList();
+                        clearTimeout(self.updateTimer);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -357,6 +396,9 @@
                     self.loading = false;
                     console.log(err);
                 })
+            },
+            page_forward (task_id){
+                this.$router.push({name: 'BacktestResult', params :{task_id: task_id}});
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;

@@ -26,7 +26,7 @@
                     <span v-text="form.stock_name"></span>
                 </el-form-item>
                 <el-form-item label="" prop="stock_symbol" :label-width="formLabelWidth">
-                    <el-button type="primary" @click="getHistoryList('form')"v-loading.fullscreen.lock="fullscreenLoading">查看数据</el-button>
+                    <el-button type="primary" @click="getHistoryListByForm('form')"v-loading.fullscreen.lock="fullscreenLoading">查看数据</el-button>
                 </el-form-item>
 
             </el-form>
@@ -90,13 +90,14 @@
                 fullscreenLoading: false,
                 history_list:[],
 
-                pageTotal:0,
+                pageTotal:1,
                 current_page:1,
                 page_size:10
             }
         },
         created: function(){
-            this.getHistoryList();
+            this.getHistoryList(1, this.page_size);
+            this.getHistoryListLength();
         },
         methods: {
             getHistoryListLength: function(){//获取task列表
@@ -111,19 +112,20 @@
                     if(res.data.ret_code == 0){
                         self.pageTotal = res.data.extra;
                     }
-                    else{
-                        self.pageTotal=0;
-                    }
                 })
             },
-            getHistoryList: function(form){//获取task列表
+            getHistoryListByForm: function(form){
+                this.getHistoryList(1, this.page_size);
+                this.getHistoryListLength();
+            },
+            getHistoryList: function(current_page, page_size){//获取task列表
                 var self = this;
                 var params = {
                     stock_symbol: this.form.stock_symbol,
                     stock_ktype: this.form.stock_ktype,
                     stock_name: this.form.stock_name,
-                    page_size: this.page_size,
-                    current_page: this.current_page,
+                    page_size: page_size,
+                    current_page: current_page,
                 };
                 self.loading = true;
                 self.$axios.post('/api/history/list', params).then(function(res){
@@ -160,7 +162,7 @@
                     }
                     var fields = data_substr[1].split(",");
                     self.form.stock_name = fields[0];
-                    this.getHistoryList();
+                    this.getHistoryList(1, this.page_size);
 
                 },function(err){
                     self.form.stock_name = '';
@@ -170,8 +172,9 @@
 
             },
             handleCurrentChange:function(val){
-                this.cur_page = val;
-                this.getHistoryListLength();
+                this.currentPage = val;
+                this.getHistoryList(this.currentPage, this.page_size);
+                //this.getHistoryListLength();
             },
         },
         computed:{

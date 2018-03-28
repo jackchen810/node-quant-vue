@@ -95,7 +95,7 @@
             getHistoryDlList: function(){//获取task列表
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/history/download/file/list').then(function(res){
+                self.$axios.post('/api/download/plan/file/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.history_dl_file_list = res.data.extra;
@@ -117,7 +117,7 @@
             getTaskPlanList: function(){//获取task列表
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/history/download/plan/list').then(function(res){
+                self.$axios.post('/api/download/plan/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0) {
                         self.task_plan_list = res.data.extra;
@@ -157,7 +157,7 @@
                 };
 
                 self.loading = true;
-                self.$axios.post('/api/history/download/plan/update', params).then(function(res){
+                self.$axios.post('/api/download/plan/update', params).then(function(res){
                     self.loading = false;
                     console.log(res);
                     if(res.data.ret_code == 0){
