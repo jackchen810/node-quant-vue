@@ -55,23 +55,17 @@
         </div>
 
         <el-table :data="backtest_result_list" border style="width: 100%" ref="multipleTable" v-loading="loading" v-if="result_show==true">
-            <el-table-column prop="request_msg" label="操作" width="120">
-                <template slot-scope="scope">
-                    <!--<el-tag>{{JSON.parse(scope.row.request_msg).item == 'sysinfo'?'ROM升级':'其他'}}</el-tag>-->
-                    <el-tag type="primary">{{curRadio == 'firmware'?'ROM升级':(curRadio == 'apps'?'插件升级':'脚本升级')}}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column prop="request_timestamp" sortable label="时间" width="170"></el-table-column>
-            <el-table-column prop="_id" label="任务ID" width="320"></el-table-column>
-            <el-table-column prop="mac" label="指定MAC" width="160">
-                <template slot-scope="scope">{{scope.row.mac.length>1?scope.row.mac[0] + ' ···':scope.row.mac.toString()}}</template>
-            </el-table-column>
-            <el-table-column prop="operator_name" label="操作人" width="120"></el-table-column>
-            <el-table-column label="详情">
-                <template slot-scope="scope">
-                    <el-button class="btn1" type="info" size="small" @click="goDetail(scope.row._id)">详情</el-button>
-                </template>
-            </el-table-column>
+            <el-table-column type="index" label="ID" width="60"></el-table-column>
+            <el-table-column prop="trade_symbol" label="股票代码" width="100"></el-table-column>
+            <el-table-column prop="symbol_name" label="股票名称" width="100"></el-table-column>
+            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
+            <el-table-column prop="strategy_name" label="交易策略" width="160"></el-table-column>
+            <el-table-column prop="order_point_at" label="买卖点时间" width="180"></el-table-column>
+            <el-table-column prop="order_type" label="买卖点类型" width="160"></el-table-column>
+            <el-table-column prop="trade_price" label="交易价格" width="100"></el-table-column>
+            <el-table-column prop="trade_amount" label="交易数量" width="100"></el-table-column>
+            <el-table-column prop="profit_rate" label="收益率" width="100"></el-table-column>
+            <el-table-column prop="max_retracement" label="最大回撤率" width="120"></el-table-column>
         </el-table>
         <div class="pagination" v-if="result_show==true">
             <el-pagination
