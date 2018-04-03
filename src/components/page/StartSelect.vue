@@ -9,7 +9,7 @@
         <div class="form-box tab-cont form-box2">
             <el-form :model="form" :rules="rules0" ref="form" label-width="150px">
                 <el-form-item label="选股范围">
-                    <el-select v-model="form.pick_range" class="inp180" placeholder="请选择范围">
+                    <el-select v-model="form.stock_range" class="inp180" placeholder="请选择范围">
                         <el-option label="上海市场" value="1"></el-option>
                         <el-option label="深圳市场" value="5"></el-option>
                         <el-option label="A股全部" value="15"></el-option>
@@ -78,7 +78,7 @@
             return {
 
                 form: {
-                    pick_range: '',
+                    stock_range: '',
                     stock_ktype:'',
                     strategy_name:'',
                 },
@@ -124,7 +124,7 @@
                 var params = {
                     strategy_name:this.form.strategy_name,
                     stock_ktype:this.form.stock_ktype,
-                    pick_range:this.form.pick_range,
+                    stock_range:this.form.stock_range,
                 };
                 self.loading = true;
                 self.$axios.post('/api/pick/stock/start', params).then(function(res){

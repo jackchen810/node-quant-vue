@@ -42,8 +42,12 @@
                         title: '系统管理',
                         subs: [
                             {
+                                index: '/select/strategy',
+                                title: '选股策略列表'
+                            },
+                            {
                                 index: '/strategy/manage',
-                                title: '策略列表'
+                                title: '交易策略列表'
                             },
                             {
                                 index: '/riskctrl/manage',
@@ -84,12 +88,8 @@
                         title: '选股系统管理',
                         subs: [
                             {
-                                index: '/select/strategy',
-                                title: '选股策略'
-                            },
-                            {
-                                index: '/start/select',
-                                title: '发起选股'
+                                index: '/select/manage',
+                                title: '任务列表'
                             },
                             {
                                 index: '/select/result',
@@ -106,10 +106,11 @@
                                 index: '/backtest/manage',
                                 title: '任务列表'
                             },
+                            /*
                             {
                                 index: '/start/backtest',
                                 title: '发起回测'
-                            },
+                            },*/
                             {
                                 index: '/backtest/result',
                                 title: '回测结果'

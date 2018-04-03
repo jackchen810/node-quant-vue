@@ -35,6 +35,10 @@ export default new Router({
                 },
                 /////交易系统管理
                 {
+                    path: '/select/strategy',
+                    component: resolve => require(['../components/page/SelectStrategy.vue'], resolve)     // vue-datasource组件
+                },
+                {
                     path: '/task/manage',
                     component: resolve => require(['../components/page/TaskManage.vue'], resolve)     // vue-datasource组件
                 },
@@ -64,15 +68,18 @@ export default new Router({
                 },
                 /////选股系统管理
                 {
-                    path: '/select/strategy',
-                    component: resolve => require(['../components/page/SelectStrategy.vue'], resolve)     // vue-datasource组件
+                    path: '/select/manage',
+                    name: 'PickstockTaskManage',
+                    component: resolve => require(['../components/page/SelectTaskManage.vue'], resolve)     // vue-datasource组件
                 },
+                /*
                 {
                     path: '/start/select',
                     component: resolve => require(['../components/page/StartSelect.vue'], resolve)     // vue-datasource组件
-                },
+                },*/
                 {
                     path: '/select/result',
+                    name: 'PickstockResult',
                     component: resolve => require(['../components/page/SelectResult.vue'], resolve)     // vue-datasource组件
                 },
                 /////回测系统管理
@@ -81,11 +88,12 @@ export default new Router({
                     name: 'BacktestTaskManage',
                     component: resolve => require(['../components/page/BacktestTaskManage.vue'], resolve)     // vue-datasource组件
                 },
+                /*
                 {
                     path: '/start/backtest',
                     name: 'StartBacktest',
                     component: resolve => require(['../components/page/StartBacktest.vue'], resolve)     // vue-datasource组件
-                },
+                },*/
                 {
                     path: '/backtest/result',
                     name: 'BacktestResult',

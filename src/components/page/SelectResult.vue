@@ -2,23 +2,17 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-upload"></i> 回测任务管理</el-breadcrumb-item>
-                <el-breadcrumb-item>回测结果</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-upload"></i> 选股任务管理</el-breadcrumb-item>
+                <el-breadcrumb-item>选股结果</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
 
         <el-table :data="result_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
-            <el-table-column prop="trade_symbol" label="股票代码" width="100"></el-table-column>
+            <el-table-column prop="stock_symbol" label="股票代码" width="100"></el-table-column>
             <el-table-column prop="symbol_name" label="股票名称" width="100"></el-table-column>
-            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
-            <el-table-column prop="strategy_name" label="交易策略" width="160"></el-table-column>
-            <el-table-column prop="order_point_at" label="买卖点时间" width="180"></el-table-column>
-            <el-table-column prop="order_type" label="买卖点类型" width="160"></el-table-column>
-            <el-table-column prop="trade_price" label="交易价格" width="100"></el-table-column>
-            <el-table-column prop="trade_amount" label="交易数量" width="100"></el-table-column>
-            <el-table-column prop="profit_rate" label="收益率" width="100"></el-table-column>
-            <el-table-column prop="max_retracement" label="最大回撤率" width="120"></el-table-column>
+            <el-table-column prop="stock_ktype" label="K线类型" width="100"></el-table-column>
+            <el-table-column prop="strategy_name" label="选股策略" width="240"></el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
@@ -50,25 +44,25 @@
             }
         },
         created:function(){
-            this.getBacktestResultList(1, this.page_size);
-            this.getBacktestResultListLength();
+            this.getPickstockResultList(1, this.page_size);
+            this.getPickstockResultListLength();
         },
         methods: {
-            getBacktestResultListLength: function(){//获取task列表
+            getPickstockResultListLength: function(){//获取task列表
                 var self = this;
                 var params = {
                     stock_symbol: this.form.stock_symbol,
                     stock_ktype: this.form.stock_ktype,
                 };
                 self.loading = true;
-                self.$axios.post('/api/backtest/result/length', params).then(function(res){
+                self.$axios.post('/api/pick/stock/result/length', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.pageTotal = res.data.extra;
                     }
                 })
             },
-            getBacktestResultList: function(current_page, page_size){//获取backtest task列表
+            getPickstockResultList: function(current_page, page_size){//获取backtest task列表
                 var self = this;
                 var params = {
                     filter: {task_id: self.getTaskId},
@@ -76,7 +70,7 @@
                     current_page: current_page,
                 };
                 self.loading = true;
-                self.$axios.post('/api/backtest/result', params).then(function(res){
+                self.$axios.post('/api/pick/stock/result', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.result_list = res.data.extra.slice(0,10);
@@ -88,8 +82,7 @@
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
-                this.getBacktestResultList(this.currentPage, this.page_size);
-                //this.getBacktestResultListLength();
+                this.getPickstockResultList(this.currentPage, this.page_size);
             },
         },
         computed:{

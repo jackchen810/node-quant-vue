@@ -39,7 +39,7 @@
                 :total="pageTotal">
             </el-pagination>
         </div>
-        <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digcont" v-if="true" >
+        <el-dialog title="添加回测任务" :visible.sync="dialogFormVisible" class="digcont" v-if="true" >
             <el-form :model="form" :rules="rules" ref="form">
                 <el-form-item label="策略名称" prop="strategy_list" :label-width="formLabelWidth"
                               v-for="(item, index) in form.strategy_list"
@@ -115,13 +115,6 @@
                 <el-button type="primary" @click="saveAdd('form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
             </div>
         </el-dialog>
-        <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digcont" center="true" v-else >
-            <span>请先绑定行情接口</span>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">退 出</el-button>
-                <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
-            </div>
-        </el-dialog>
     </div>
 </template>
 
@@ -190,9 +183,6 @@
                     market_gateway: '',
                 },
                 rules: {
-                    start_time:[
-                        {required: true, message: '请输入开始时间', trigger: 'blur'},
-                    ],
                     start_time:[
                         {required: true, message: '请输入开始时间', trigger: 'blur'},
                     ],
@@ -276,7 +266,7 @@
                         }
                     }
 
-                    self.task_list = [];
+                    //self.task_list = [];
                     self.updateTimer = setTimeout(function(){
                         self.getTaskStatusById(task_id);
                     },2000)

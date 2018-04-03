@@ -11,10 +11,18 @@
         </div>
         <el-table :data="task_plan_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
-            <el-table-column prop="task_script" label="任务" width="160"></el-table-column>
-            <el-table-column prop="task_name" label="名称" width="160"></el-table-column>
+            <el-table-column prop="task_script" label="任务名称" width="160"></el-table-column>
+            <el-table-column prop="task_name" label="任务名称" width="160"></el-table-column>
+            <el-table-column prop="task_exce_time" label="任务执行时间" width="180"></el-table-column>
             <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
             <el-table-column prop="create_at" label="创建时间" width="180"></el-table-column>
+            <el-table-column label="操作" width="120">
+                <template slot-scope="scope">
+                    <el-button class="btn1" type="text" size="small" @click="delTask(scope.row.task_id)">删除</el-button>
+                    <el-button class="btn1" type="danger" size="small" v-if="scope.row.task_status =='running'" @click="stopTask(scope.row.task_id)">停止</el-button>
+                    <el-button class="btn1" type="success" size="small" v-else @click="startTask(scope.row.task_id)">启动</el-button>
+                </template>
+            </el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
@@ -174,6 +182,77 @@
                     console.log(err);
                 })
 
+            },
+            delTask: function(task_id){//删除
+                var self = this;
+                var params = {
+                    task_id: task_id
+                };
+                self.loading = true;
+                self.$axios.post('/api/pick/stock/del', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message('删除成功');
+                        self.getTaskList();
+                    }
+                    else {
+                        self.$message(res.data.extra);
+                    }
+
+                },function(err){
+                    self.$message('删除失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+            },
+            startTask: function(task_id){//上架操作
+                var self = this;
+                var params = {
+                    task_id: task_id,
+                };
+                self.loading = true;
+                self.$axios.post('/api/pick/stock/start',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message('操作成功');
+                        self.getTaskList();
+                        //启动定时器，定时查询状态
+                        self.updateTimer = setTimeout(function(){
+                            self.getTaskStatusById(task_id);
+                        },2000)
+                    }
+                    else {
+                        self.$message(res.data.extra);
+                    }
+
+                },function(err){
+                    self.$message('操作失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+            },
+            stopTask: function(task_id){//下架操作
+                var self = this;
+                var params = {
+                    task_id: task_id,
+                };
+                self.loading = true;
+                self.$axios.post('/api/pick/stock/stop', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message('操作成功');
+                        self.getTaskList();
+                        clearTimeout(self.updateTimer);
+                    }
+                    else {
+                        self.$message(res.data.extra);
+                    }
+
+                },function(err){
+                    self.$message('操作失败');
+                    self.loading = false;
+                    console.log(err);
+                })
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
