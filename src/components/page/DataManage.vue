@@ -11,8 +11,8 @@
         </div>
         <el-table :data="task_plan_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
+            <el-table-column prop="task_id" label="任务ID" width="320"></el-table-column>
             <el-table-column prop="task_script" label="任务名称" width="160"></el-table-column>
-            <el-table-column prop="task_name" label="任务名称" width="160"></el-table-column>
             <el-table-column prop="task_exce_time" label="任务执行时间" width="180"></el-table-column>
             <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
             <el-table-column prop="create_at" label="创建时间" width="180"></el-table-column>
@@ -41,8 +41,15 @@
                             placeholder="请选择执行时间">
                     </el-time-picker>
                 </el-form-item>
-                <el-form-item label="" prop="task_select_id_list" :inline="true":label-width="formLabelWidth">
-                    <el-transfer v-model="form.task_select_id_list" :titles="['可选任务列表', '计划任务列表']" :data="task_plan_data"></el-transfer>
+                <el-form-item label="选择计划任务" prop="task_plan_script">
+                    <el-select v-model="form.task_plan_script" class="inp180" placeholder="请选择计划任务">
+                        <el-option
+                            v-for="item in download_file_list"
+                            :key="item"
+                            :label="item"
+                            :value="item">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -60,13 +67,12 @@
             return {
                 dialogFormVisible:false,
 
-                task_plan_data:[],
                 task_plan_list:[],
-                history_dl_file_list:[],
+                download_file_list:[],
 
                 form: {
                     task_exce_time:new Date(),
-                    task_select_id_list:[],  //[1,2]
+                    task_plan_script:'',
                 },
 
                 rules: {
@@ -86,7 +92,7 @@
             }
         },
         created: function(){
-            this.getHistoryDlList();
+            this.getPlanFileList();
             this.getTaskPlanList();
 
             //this.getValidStockList();
@@ -100,21 +106,13 @@
             console.log('destory');
         },
         methods: {
-            getHistoryDlList: function(){//获取task列表
+            getPlanFileList: function(){//获取task列表
                 var self = this;
                 self.loading = true;
                 self.$axios.post('/api/download/plan/file/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.history_dl_file_list = res.data.extra;
-                        for (var i = 0; i < self.history_dl_file_list.length; i++) {
-                            self.task_plan_data.push({
-                                key: i,
-                                label: `${ self.history_dl_file_list[i]}`,
-                                disabled: false,
-                            });
-                        }
-                        console.log('task_plan_data', self.task_plan_data);
+                        self.download_file_list = res.data.extra;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -129,16 +127,6 @@
                     self.loading = false;
                     if(res.data.ret_code == 0) {
                         self.task_plan_list = res.data.extra;
-
-                        ///更新穿梭框
-                        for (var m = 0; m < self.task_plan_list.length; m++) {
-                            var task_script = self.task_plan_list[m]['task_script']
-                            for (var i = 0; i < self.history_dl_file_list.length; i++) {
-                                if (task_script == self.history_dl_file_list[i]) {
-                                    self.form.task_select_id_list.push(i);
-                                }
-                            }
-                        }
                     }
                     else{
                         console.log('resp:', res.data)
@@ -147,25 +135,13 @@
             },
             saveAdd: function(formName){
                 var self = this;
-                var task_select_list = [];
-                for (var i = 0; i < self.task_plan_data.length; i++) {
-                    task_select_list[i] = {'task_script': self.task_plan_data[i].label, 'task_status': 'stop'};
-                }
-
-                for (var i = 0; i < self.form.task_select_id_list.length; i++) {
-                    var id = self.form.task_select_id_list[i];
-                    task_select_list[id]['task_status'] = 'running';
-                }
-
 
                 var params = {
                     task_exce_time:self.form.task_exce_time,
-                    task_select_id_list:self.form.task_select_id_list,
-                    task_select_list:task_select_list,
+                    task_plan_script:self.form.task_plan_script,
                 };
-
                 self.loading = true;
-                self.$axios.post('/api/download/plan/update', params).then(function(res){
+                self.$axios.post('/api/download/plan/add', params).then(function(res){
                     self.loading = false;
                     console.log(res);
                     if(res.data.ret_code == 0){
@@ -189,11 +165,11 @@
                     task_id: task_id
                 };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/del', params).then(function(res){
+                self.$axios.post('/api/download/plan/del', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
-                        self.getTaskList();
+                        self.getTaskPlanList();
                     }
                     else {
                         self.$message(res.data.extra);
@@ -211,15 +187,11 @@
                     task_id: task_id,
                 };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/start',params).then(function(res){
+                self.$axios.post('/api/download/plan/start',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList();
-                        //启动定时器，定时查询状态
-                        self.updateTimer = setTimeout(function(){
-                            self.getTaskStatusById(task_id);
-                        },2000)
+                        self.getTaskPlanList();
                     }
                     else {
                         self.$message(res.data.extra);
@@ -237,11 +209,11 @@
                     task_id: task_id,
                 };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/stop', params).then(function(res){
+                self.$axios.post('/api/download/plan/stop', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList();
+                        self.getTaskPlanList();
                         clearTimeout(self.updateTimer);
                     }
                     else {
@@ -256,7 +228,7 @@
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
-                this.getTaskList();
+                this.getTaskPlanList();
             },
         },
         computed:{
