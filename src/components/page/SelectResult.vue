@@ -55,12 +55,8 @@
         methods: {
             getPickstockResultListLength: function(){//获取task列表
                 var self = this;
-                var params = {
-                    stock_symbol: this.form.stock_symbol,
-                    stock_ktype: this.form.stock_ktype,
-                };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/result/length', params).then(function(res){
+                self.$axios.post('/api/pick/stock/result/length').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.pageTotal = res.data.extra;
