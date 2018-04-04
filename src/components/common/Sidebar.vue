@@ -64,7 +64,7 @@
                         ]
                     },
                     {
-                        icon: 'el-icon-date',
+                        icon: 'el-icon-menu',
                         index: '3',
                         title: '监测任务管理',
                         subs: [
@@ -79,7 +79,7 @@
                         ]
                     },
                     {
-                        icon: 'el-icon-date',
+                        icon: 'el-icon-menu',
                         index: '4',
                         title: '交易任务管理',
                         subs: [

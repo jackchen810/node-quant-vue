@@ -13,6 +13,11 @@
             <el-table-column prop="symbol_name" label="股票名称" width="100"></el-table-column>
             <el-table-column prop="stock_ktype" label="K线类型" width="100"></el-table-column>
             <el-table-column prop="strategy_name" label="选股策略" width="240"></el-table-column>
+            <el-table-column label="操作" width="120">
+                <template slot-scope="scope">
+                    <el-button class="btn1" type="text" size="small" @click="addObject2Monitor(scope.row.stock_symbol)">加入任务监控</el-button>
+                </template>
+            </el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
@@ -77,6 +82,20 @@
                     }
                     else{
                         self.result_list = [];
+                    }
+                })
+            },
+            addObject2Monitor: function(){//获取task列表
+                var self = this;
+                var params = {
+                    stock_symbol: this.form.stock_symbol,
+                    stock_ktype: this.form.stock_ktype,
+                };
+                self.loading = true;
+                self.$axios.post('/api/pick/stock/result/length', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.pageTotal = res.data.extra;
                     }
                 })
             },

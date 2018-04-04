@@ -19,12 +19,12 @@
             <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>
             <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
             <el-table-column prop="price" label="最新价" width="80"></el-table-column>
-            <el-table-column label="操作" width="120">
+            <el-table-column label="操作" width="200">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="delTask(scope.row.task_id)">删除</el-button>
                     <el-button class="btn1" type="danger" size="small" v-if="scope.row.task_status =='running'" @click="stopTask(scope.row.task_id)">停止</el-button>
                     <el-button class="btn1" type="success" size="small" v-else @click="startTask(scope.row.task_id)">启动</el-button>
-                    <el-button class="btn1" type="text" size="small" @click="page_forward(scope.row.task_id)">查看结果</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="page_forward(scope.row.task_id)">查看买卖点</el-button>
                 </template>
             </el-table-column>
         </el-table>
