@@ -27,7 +27,7 @@
                 items: [
                     {
                         icon: 'el-icon-menu',
-                        index: '2',
+                        index: '1',
                         title: '测试管理',
                         subs: [
                             {
@@ -38,7 +38,7 @@
                     },
 		            {
                         icon: 'el-icon-date',
-                        index: '3',
+                        index: '2',
                         title: '系统管理',
                         subs: [
                             {
@@ -61,6 +61,21 @@
                                 index: '/market/gateway',
                                 title: '行情接口列表'
                             }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-date',
+                        index: '3',
+                        title: '监测任务管理',
+                        subs: [
+                            {
+                                index: '/monitor/manage',
+                                title: '任务列表'
+                            },
+                            {
+                                index: '/monitor/buysell',
+                                title: '买卖点统计'
+                            },
                         ]
                     },
                     {

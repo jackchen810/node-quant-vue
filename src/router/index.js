@@ -66,6 +66,17 @@ export default new Router({
                     path: '/market/gateway',
                     component: resolve => require(['../components/page/MarketGatewayManage.vue'], resolve)     // vue-datasource组件
                 },
+                /////监测系统管理
+                {
+                    path: '/monitor/manage',
+                    name: 'MonitorTaskManage',
+                    component: resolve => require(['../components/page/MonitorTaskManage.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/monitor/buysell',
+                    name: 'MonitorBuySell',
+                    component: resolve => require(['../components/page/MonitorBuySellPoint.vue'], resolve)     // vue-datasource组件
+                },
                 /////选股系统管理
                 {
                     path: '/select/manage',
