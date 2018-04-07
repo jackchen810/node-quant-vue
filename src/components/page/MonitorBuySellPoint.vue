@@ -53,8 +53,7 @@
             getTradePointListLength: function(){//获取task列表
                 var self = this;
                 var params = {
-                    stock_symbol: this.form.stock_symbol,
-                    stock_ktype: this.form.stock_ktype,
+                    filter: {task_id: self.getTaskId},
                 };
                 self.loading = true;
                 self.$axios.post('/api/trade/point/list/length', params).then(function(res){
@@ -90,7 +89,14 @@
         computed:{
             getTaskId(){
                 //因为在main.js中已经全局注册了store，所以这里直接用this.$直接使用。
-                return this.$route.params.task_id;
+                var task_id = this.$route.params.task_id;
+                if (typeof(task_id) === "undefined") {
+                    task_id = localStorage.getItem('monitor_task_id');
+                }
+                else {
+                    localStorage.setItem('monitor_task_id', task_id);
+                }
+                return task_id;
             }
         }
     }

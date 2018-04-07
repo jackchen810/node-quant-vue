@@ -6,25 +6,40 @@
                 <el-breadcrumb-item>TASK列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
+        <h4>基本信息:</h4>
+        <el-table :data="system_setup_list" border style="width: 100%;margin:20px 0 20px;" ref="multileTable" v-loading="loading">
+            <el-table-column prop="market_gateway" label="行情接口" width="180"></el-table-column>
+            <el-table-column prop="riskctrl_name" label="风控名称" width="180"></el-table-column>
+            <el-table-column prop="order_gateway" label="交易接口" width="180"></el-table-column>
+        </el-table>
+        <div class="handle-box rad-group">
+            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="createTask('system_setup_list')">创建任务</el-button>
+            <!--
+           <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogMarketVisible=true">绑定行情接口</el-button>
+           <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建任务</el-button>
+           <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当前绑定的行情接口：</span>
+           <span v-text="form.bind_market_gateway"></span>
+           -->
+        </div>
         <el-table :data="task_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
             <!--
             <el-table-column prop="stock_name" label="股票名称" width="100"></el-table-column>
             <el-table-column prop="obj_amount" label="操作量" width="80"></el-table-column>
-            -->
-            <el-table-column prop="task_type" label="任务类型" width="100"></el-table-column>
             <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
-            <el-table-column prop="market_gateway" label="行情接口" width="180"></el-table-column>
-            <el-table-column prop="strategy_name" label="策略标的" width="180"></el-table-column>
+            <el-table-column prop="task_type" label="任务类型" width="100"></el-table-column>
+            -->
+            <el-table-column prop="task_id" label="任务ID" width="300"></el-table-column>
+            <el-table-column prop="trade_ktype" label="K线类型" width="80"></el-table-column>
+            <el-table-column prop="strategy_name" label="交易策略" width="180"></el-table-column>
             <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>
             <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
-            <el-table-column prop="price" label="最新价" width="80"></el-table-column>
-            <el-table-column label="操作" width="200">
+            <el-table-column label="操作" width="250">
                 <template slot-scope="scope">
-                    <el-button class="btn1" type="text" size="small" @click="delTask(scope.row.task_id)">删除</el-button>
+                    <el-button class="btn1" type="primary" size="small" @click="delTask(scope.row.task_id)">删除</el-button>
                     <el-button class="btn1" type="danger" size="small" v-if="scope.row.task_status =='running'" @click="stopTask(scope.row.task_id)">停止</el-button>
                     <el-button class="btn1" type="success" size="small" v-else @click="startTask(scope.row.task_id)">启动</el-button>
-                    <el-button class="btn1" type="text" size="small" @click="page_forward(scope.row.task_id)">查看买卖点</el-button>
+                    <el-button class="btn1" type="primary" size="small" @click="page_forward_detail(scope.row.task_id)">任务详情</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -36,6 +51,73 @@
                     :total="pageTotal">
             </el-pagination>
         </div>
+        <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digform" >
+            <el-form :model="form" :rules="rules" ref="form">
+                <el-form-item label="策略名称" prop="strategy_list" :label-width="formLabelWidth"
+                              v-for="(item, index) in form.strategy_list"
+                              :label="'策略' + index"
+                              :key="item.key"
+                              :prop="item.key"
+                >
+                    <div class="block">
+                        <label>股票代码：</label>
+                        <el-input v-model="form.strategy_list[index].stock_symbol" class="inp150" auto-complete="off" placeholder="请输入股票代码" @change="changeStockSymbol(index)"></el-input>
+                        <span v-text="form.strategy_list[index].stock_name"></span>
+                    </div>
+                    <div>
+                        <label>K 线周期：</label>
+                        <el-input v-model="form.strategy_main" v-if="index==0&&form.strategy_type>1" class="inp180" auto-complete="off" :disabled="true"></el-input>
+                        <el-select v-model="form.strategy_list[index].stock_ktype" v-else class="inp180" placeholder="请选择K线周期">
+                            <el-option label="1分钟" value="1"></el-option>
+                            <el-option label="5分钟" value="5"></el-option>
+                            <el-option label="15分钟" value="15"></el-option>
+                            <el-option label="30分钟" value="30"></el-option>
+                            <el-option label="60分钟" value="60"></el-option>
+                            <el-option label="120分钟" value="120"></el-option>
+                            <el-option label="日线" value="day"></el-option>
+                            <el-option label="周线" value="week"></el-option>
+                            <el-option label="月线" value="month"></el-option>
+                        </el-select>
+                    </div>
+                    <div v-if="index==0">
+                        <label>交易数量：</label>
+                        <el-input v-model="form.strategy_list[index].trade_amount" class="inp180" auto-complete="off" placeholder="请输入交易数量"></el-input>
+                    </div>
+                    <div>
+                        <label>对应策略：</label>
+                        <el-select v-model="form.strategy_list[index].strategy_name" class="inp180" placeholder="请选择对应策略">
+                            <el-option
+                                    v-for="item in strategy_file_list"
+                                    :key="item"
+                                    :label="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                        <el-button v-if="index==0&&form.strategy_type==1" :disabled="true">N</el-button>
+                        <el-button v-else-if="index==0&&form.strategy_type>1" @click.prevent="addStrategyItem(index)">+</el-button>
+                        <el-button v-else @click.prevent="removeStrategyItem(index)">-</el-button>
+                    </div>
+                </el-form-item>
+                <el-form-item label="" prop="strategy_type" :inline="true":label-width="formLabelWidth">
+                    <el-radio-group v-model="form.strategy_type" @change="changeStrategyItem(index)" :inline="true">
+                        <el-radio label="1">简单策略</el-radio>
+                        <el-radio label="2">多级别分析策略</el-radio>
+                        <el-radio label="3">综合分析策略（策略0为主策略）</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">退 出</el-button>
+                <el-button type="primary" @click="saveAdd('form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
+            </div>
+        </el-dialog>
+        <el-dialog title="添加交易任务" :visible.sync="dialogFormWarnVisible" class="digformwarn">
+            <h3>请先绑定行情接口</h3>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormWarnVisible = false">退 出</el-button>
+                <el-button type="primary" @click="page_forward_setup()">确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -45,17 +127,18 @@
         data: function(){
             return {
                 dialogFormVisible:false,
+                dialogFormWarnVisible:false,
                 dialogMarketVisible:false,
                 dialogCheckVisible:false,
                 radio3:'全部',
 
-                tiemout:'',
+                updateTimer:'',
 
                 form: {
                     task_id:'',
                     task_status:'',
                     obj_amount:'',
-                    trade_symbol:'111',
+                    trade_symbol:'00001',
                     trade_ktype:'1',
                     stock_name:'www',
                     strategy_main:'主策略',
@@ -87,53 +170,74 @@
 
                 formLabelWidth: '100px',
                 formLabelWidth50: '50px',
-                fileList3: [],
                 loading:false,
                 fullscreenLoading: false,
+                system_setup_list: [],
                 task_list:[],
                 strategy_file_list:[],
-                riskctrl_file_list:[],
-                order_gateway_file_list:[],
-                market_gateway_file_list:[],
                 valid_stock_list:[],
 
-                pageTotal:0,
-                currentPage:1
+                pageTotal:1,
+                currentPage:1,
+                page_size:10
             }
         },
         created: function(){
-            if ( this.tiemout ) {
-                clearTimeout(this.tiemout);
-                this.tiemout = '';
+            if ( this.updateTimer ) {
+                clearTimeout(this.updateTimer);
+                this.updateTimer = '';
             }
 
-            this.getTaskList();
+            this.getTaskList(1, this.page_size);
+            this.getTaskListLength();
             //this.getTaskPrice();
             this.getStrategyList();
-            this.getRiskCtrlList();
-            this.getOrderGatewayList();
-            this.getMarketGatewayList();
-            this.getBindMarket();
-
-            //this.getValidStockList();
+            this.getSystemSetupList();
         },
         beforeDestroy: function(){
-            if ( this.tiemout ) {
-                clearTimeout(this.tiemout);
-                this.tiemout = '';
+            if ( this.updateTimer ) {
+                clearTimeout(this.updateTimer);
+                this.updateTimer = '';
             }
 
             console.log('destory');
         },
         methods: {
-            getTaskList: function(){//获取task列表
+            getSystemSetupList: function(){//获取task列表
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/task/list').then(function(res){
+                self.$axios.post('/api/system/setup/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra.length;
-                        self.task_list = res.data.extra.slice(0,10);
+                        self.system_setup_list = res.data.extra;
+                    }
+                })
+            },
+            getTaskListLength: function(){//获取task列表
+                var self = this;
+                var params = {
+                    filter: {task_type: 'trade'},
+                };
+                self.loading = true;
+                self.$axios.post('/api/task/list/length', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.pageTotal = res.data.extra;
+                    }
+                })
+            },
+            getTaskList: function(current_page, page_size){//获取task列表
+                var self = this;
+                var params = {
+                    filter: {task_type: 'trade'},
+                    page_size: page_size,
+                    current_page: current_page,
+                };
+                self.loading = true;
+                self.$axios.post('/api/task/list', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.task_list = res.data.extra.slice(0, self.page_size);
                     }
                     else{
                         self.task_list = [];
@@ -169,7 +273,7 @@
                 })
                 console.log(this.$route.path )
                 if ( this.$route.path == '/task/manage' ) {
-                    this.tiemout = setTimeout(() => {
+                    this.updateTimer = setTimeout(() => {
                         //this.getTaskPrice();
                     }, 5000);
                 }
@@ -182,45 +286,6 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.strategy_file_list = res.data.extra;
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-            },
-            getRiskCtrlList: function(){//获取设备类型
-                var self = this;
-                self.loading = true;
-                self.$axios.post('/api/riskctrl/list').then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.riskctrl_file_list = res.data.extra;
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-            },
-            getOrderGatewayList: function(){//获取设备类型
-                var self = this;
-                self.loading = true;
-                self.$axios.post('/api/order/list').then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.order_gateway_file_list = res.data.extra;
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-            },
-            getMarketGatewayList: function(){//获取设备类型
-                var self = this;
-                self.loading = true;
-                self.$axios.post('/api/market/list').then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.market_gateway_file_list = res.data.extra;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -256,56 +321,6 @@
                     }
                 })
             },
-            getBindMarket: function(){//获取绑定的行情
-                var self = this;
-                self.$axios.post('/api/market/get/bindobj').then(function(res){
-                    if(res.data.ret_code == 0){
-                        self.form.bind_market_gateway = res.data.extra;
-                        self.form.market_gateway = res.data.extra;
-                    }
-                    else{
-                        console.log('resp:', res.data)
-                    }
-                })
-            },
-            beforeUpload: function(file){
-                console.log(file);
-                this.form.file_name = file.name;
-                return true;
-            },
-            handleSuccess: function(response,file,fileList){
-                console.log(response);
-                this.fullscreenLoading  = false;
-                this.$message('创建成功');
-                this.dialogFormVisible = false;
-                this.getTaskList();
-            },
-            handleError: function(response,file,fileList){
-                this.$message('操作失败');
-                self.fullscreenLoading  = false;
-            },
-            page_forward (task_id){
-                this.$router.push({name: 'PickstockResult', params :{task_id: task_id}});
-            },
-            bindMarket: function(file_name) {
-                var self = this;
-                var params = {
-                    file_name:file_name,
-                    is_bind:'true',
-                };
-                self.$axios.post('/api/market/bind', params).then(function(res){
-                    console.log(res);
-                    if(res.data.ret_code == 0){
-                        self.$message('绑定成功');
-                        self.dialogMarketVisible = false;
-                        self.form.bind_market_gateway = self.form.market_gateway;
-                    }
-                    else{
-                        self.$message('绑定失败:' + res.data.extra);
-                    }
-                });
-            },
-
             saveAdd: function(formName){
                 var self = this;
 
@@ -317,7 +332,7 @@
                     strategy_list:self.form.strategy_list,
                     riskctrl_name:self.form.riskctrl_name,
                     order_gateway:self.form.order_gateway,
-                    market_gateway:self.form.market_gateway
+                    market_gateway:self.form.bind_market_gateway
                 };
 
                 self.loading = true;
@@ -326,7 +341,7 @@
                     console.log(res);
                     if(res.data.ret_code == 0){
                         self.$message('添加成功');
-                        self.getTaskList();
+                        self.getTaskList(1, self.page_size);
                     }
                     else{
                         self.$message('添加失败:' + res.data.extra);
@@ -349,7 +364,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
-                        self.getTaskList();
+                        self.getTaskList(1, self.page_size);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -371,7 +386,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList();
+                        self.getTaskList(1, self.page_size);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -393,7 +408,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList();
+                        self.getTaskList(1, self.page_size);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -405,9 +420,32 @@
                     console.log(err);
                 })
             },
+            createTask: function(){//task detail操作
+                var self = this;
+                if (self.system_setup_list.length == 0 ) {
+                    self.dialogFormWarnVisible = true;
+                }
+                else if (self.system_setup_list.market_gateway == '' ||
+                    self.system_setup_list[0].riskctrl_name == '' ||
+                    self.system_setup_list[0].order_gateway == '' ){
+                    self.dialogFormWarnVisible = true;
+                }
+                else{
+                    self.dialogFormVisible = true;
+                    self.form.order_gateway = self.system_setup_list[0].order_gateway;
+                    self.form.riskctrl_name = self.system_setup_list[0].riskctrl_name;
+                    self.form.market_gateway = self.system_setup_list[0].market_gateway;
+                }
+            },
+            page_forward_setup: function(){
+                this.$router.push({name: 'SystemSetup'});
+            },
+            page_forward_detail: function(task_id){//task detail操作
+                this.$router.push({name:'TradeTaskDetail', params :{task_id: task_id}});
+            },
             handleCurrentChange:function(val){
-                this.cur_page = val;
-                this.getTaskList();
+                this.currentPage = val;
+                this.getTaskList(this.currentPage, this.page_size);
             },
             changeStockSymbol:function(index) {
 
@@ -495,6 +533,8 @@
     .inp150{width:140px;}
     .inp160{width:160px;}
     .inp180{width:180px;}
+    .inp200{width:200px;}
+    .inp240{width:240px;}
     .nowrap{white-space:nowrap;}
     .upload-demo .el-upload {
         cursor: pointer;

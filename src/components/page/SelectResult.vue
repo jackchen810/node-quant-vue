@@ -55,8 +55,11 @@
         methods: {
             getPickstockResultListLength: function(){//获取task列表
                 var self = this;
+                var params = {
+                    filter: {task_id: self.getTaskId},
+                };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/result/length').then(function(res){
+                self.$axios.post('/api/pick/stock/result/length', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.pageTotal = res.data.extra;
@@ -88,7 +91,7 @@
                     stock_ktype: this.form.stock_ktype,
                 };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/result/length', params).then(function(res){
+                self.$axios.post('/api/monitor/task/add', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.pageTotal = res.data.extra;
@@ -103,7 +106,15 @@
         computed:{
             getTaskId(){
                 //因为在main.js中已经全局注册了store，所以这里直接用this.$直接使用。
-                return this.$route.params.task_id;
+                var task_id = this.$route.params.task_id;
+                //this.$message('操作'+ this.params_task_id);
+                if (typeof(task_id) === "undefined") {
+                    task_id = localStorage.getItem('select_task_id');
+                }
+                else {
+                    localStorage.setItem('select_task_id', task_id);
+                }
+                return task_id;
             }
         }
     }

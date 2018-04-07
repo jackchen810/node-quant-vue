@@ -86,7 +86,6 @@
                 dialogFormVisible:false,
                 radio3:'全部',
 
-                tiemout:'',
 
                 form: {
                     task_id:'',
@@ -95,7 +94,7 @@
                     stock_ktype: '',
                     stock_range: '',
                 },
-                rules: {
+                rules0: {
                     start_time:[
                         {required: true, message: '请输入开始时间', trigger: 'blur'},
                     ],
@@ -115,30 +114,38 @@
                 task_list:[],
                 strategy_file_list:[],
 
-                pageTotal:0,
-                currentPage:1
+                pageTotal:1,
+                currentPage:1,
+                page_size:10
             }
         },
         created: function(){
-            if ( this.tiemout ) {
-                clearTimeout(this.tiemout);
-                this.tiemout = '';
-            }
 
-            this.getTaskList();
-            //this.getTaskPrice();
+            this.getTaskList(1, this.page_size);
+            this.getTaskListLength();
             this.getPickStrategyList();
-
-            //this.getValidStockList();
         },
         methods: {
-            getTaskList: function(){//获取backtest task列表
+            getTaskListLength: function(){//获取task列表
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/task/list').then(function(res){
+                self.$axios.post('/api/pick/stock/task/list/length').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra.length;
+                        self.pageTotal = res.data.extra;
+                    }
+                });
+            },
+            getTaskList: function(current_page, page_size){//获取backtest task列表
+                var self = this;
+                var params = {
+                    page_size: page_size,
+                    current_page: current_page,
+                };
+                self.loading = true;
+                self.$axios.post('/api/pick/stock/task/list', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
                         self.task_list = res.data.extra.slice(0,10);
                     }
                     else{
@@ -289,8 +296,8 @@
                 this.$router.push({name: 'PickstockResult', params :{task_id: task_id}});
             },
             handleCurrentChange:function(val){
-                this.cur_page = val;
-                this.getTaskList();
+                this.currentPage = val;
+                this.getTaskList(this.currentPage, this.page_size);
             },
         },
         computed:{

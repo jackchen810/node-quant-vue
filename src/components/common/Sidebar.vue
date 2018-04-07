@@ -42,6 +42,10 @@
                         title: '系统管理',
                         subs: [
                             {
+                                index: '/system/setup',
+                                title: '系统设置'
+                            },
+                            {
                                 index: '/select/strategy',
                                 title: '选股策略列表'
                             },

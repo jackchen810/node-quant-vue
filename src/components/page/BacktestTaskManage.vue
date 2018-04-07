@@ -160,7 +160,6 @@
                 dialogCheckVisible:false,
                 radio3:'全部',
 
-                tiemout:'',
 
                 form: {
                     task_id:'',
@@ -207,31 +206,53 @@
                 market_gateway_file_list:[],
                 valid_stock_list:[],
 
-                pageTotal:0,
-                currentPage:1
+                pageTotal:1,
+                currentPage:1,
+                page_size:10
             }
         },
         created: function(){
-            if ( this.tiemout ) {
-                clearTimeout(this.tiemout);
-                this.tiemout = '';
+            if ( this.updateTimer ) {
+                clearTimeout(this.updateTimer);
+                this.updateTimer = '';
             }
 
-            this.getTaskList();
-            //this.getTaskPrice();
+            this.getBackTestTaskList(1, this.page_size);
+            this.getBacktestTaskListLength();
             this.getStrategyList();
 
             //this.getValidStockList();
         },
+        beforeDestroy: function(){
+            if ( this.updateTimer ) {
+                clearTimeout(this.updateTimer);
+                this.updateTimer = '';
+            }
+
+            console.log('destory');
+        },
         methods: {
-            getTaskList: function(){//获取backtest task列表
+            getBacktestTaskListLength: function(){//获取task列表
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/backtest/list').then(function(res){
+                self.$axios.post('/api/backtest/list/length').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra.length;
-                        self.task_list = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.extra;
+                    }
+                })
+            },
+            getBackTestTaskList: function(current_page, page_size){//获取backtest task列表
+                var self = this;
+                var params = {
+                    page_size: page_size,
+                    current_page: current_page,
+                };
+                self.loading = true;
+                self.$axios.post('/api/backtest/list', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.task_list = res.data.extra.slice(0,self.page_size);
                     }
                     else{
                         self.task_list = [];
@@ -303,7 +324,7 @@
                     console.log(res);
                     if(res.data.ret_code == 0){
                         self.$message('添加成功');
-                        self.getTaskList();
+                        self.getBackTestTaskList(1, self.page_size);
                     }
                     else{
                         self.$message('添加失败:' + res.data.extra);
@@ -326,7 +347,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
-                        self.getTaskList();
+                        self.getBackTestTaskList(1, self.page_size);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -348,7 +369,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList();
+                        self.getBackTestTaskList(1, self.page_size);
                         //启动定时器，定时查询状态
                         self.updateTimer = setTimeout(function(){
                             self.getTaskStatusById(task_id);
@@ -374,7 +395,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList();
+                        self.getBackTestTaskList(1, self.page_size);
                         clearTimeout(self.updateTimer);
                     }
                     else {
@@ -391,8 +412,8 @@
                 this.$router.push({name: 'BacktestResult', params :{task_id: task_id}});
             },
             handleCurrentChange:function(val){
-                this.cur_page = val;
-                this.getTaskList();
+                this.currentPage = val;
+                this.getBackTestTaskList(this.currentPage, this.page_size);
             },
             changeStockSymbol:function(index) {
 

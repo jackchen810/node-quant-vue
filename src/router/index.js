@@ -21,34 +21,15 @@ export default new Router({
                     path: '/basetable',
                     component: resolve => require(['../components/page/BaseTable.vue'], resolve)
                 },
+                /////系统管理
                 {
-                    path: '/setpush',
-                        component: resolve => require(['../components/page/SetPush.vue'], resolve)     // vue-datasource组件
+                    path: '/system/setup',
+                    name: 'SystemSetup',
+                    component: resolve => require(['../components/page/SystemSetup.vue'], resolve)     // vue-datasource组件
                 },
-                {
-                    path: '/pushresult',
-                        component: resolve => require(['../components/page/PushResult.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/pushresultdetail',
-                        component: resolve => require(['../components/page/PushResultDetail.vue'], resolve)     // vue-datasource组件
-                },
-                /////交易系统管理
                 {
                     path: '/select/strategy',
                     component: resolve => require(['../components/page/SelectStrategy.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/task/manage',
-                    component: resolve => require(['../components/page/TaskManage.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/task/log',
-                    component: resolve => require(['../components/page/TaskLog.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/task/buysell',
-                    component: resolve => require(['../components/page/TaskBuySell.vue'], resolve)     // vue-datasource组件
                 },
                 {
                     path: '/strategy/manage',
@@ -65,6 +46,24 @@ export default new Router({
                 {
                     path: '/market/gateway',
                     component: resolve => require(['../components/page/MarketGatewayManage.vue'], resolve)     // vue-datasource组件
+                },
+                /////交易系统管理
+                {
+                    path: '/task/manage',
+                    component: resolve => require(['../components/page/TradeTaskManage.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/task/log',
+                    component: resolve => require(['../components/page/TradeTaskLog.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/task/buysell',
+                    component: resolve => require(['../components/page/TradeTaskBuySellPoint.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/task/detail',
+                    name: 'TradeTaskDetail',
+                    component: resolve => require(['../components/page/TradeTaskDetail.vue'], resolve)     // vue-datasource组件
                 },
                 /////监测系统管理
                 {

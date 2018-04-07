@@ -91,7 +91,7 @@
                 history_list:[],
 
                 pageTotal:1,
-                current_page:1,
+                currentPage:1,
                 page_size:10
             }
         },
