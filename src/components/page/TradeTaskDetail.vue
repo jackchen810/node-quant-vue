@@ -14,13 +14,13 @@
         <hr style="margin-bottom:40px;height:1px;border:none;border-top:1px solid #ddd;">
         <el-table :data="task_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
-            <el-table-column prop="task_type" label="任务类型" width="100"></el-table-column>
-            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
+            <el-table-column prop="task_type" label="任务类型"></el-table-column>
+            <el-table-column prop="trade_ktype" label="K线类型"></el-table-column>
             <el-table-column prop="strategy_name" label="策略标的" width="180"></el-table-column>
             <el-table-column prop="riskctrl_name" label="风控名称" width="180"></el-table-column>
             <el-table-column prop="order_gateway" label="交易接口" width="180"></el-table-column>
-            <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>
-            <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
+            <el-table-column prop="trade_symbol" label="交易标的"></el-table-column>
+            <el-table-column prop="task_status" label="运行状态"></el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination

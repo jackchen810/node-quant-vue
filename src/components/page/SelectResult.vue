@@ -6,15 +6,22 @@
                 <el-breadcrumb-item>选股结果</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-
+        <div class="handle-box rad-group">
+            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">加入任务监控</el-button>
+        </div>
         <el-table :data="result_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column type="index" label="ID" width="60"></el-table-column>
-            <el-table-column prop="stock_symbol" label="股票代码" width="100"></el-table-column>
-            <el-table-column prop="symbol_name" label="股票名称" width="100"></el-table-column>
-            <el-table-column prop="stock_ktype" label="K线类型" width="100"></el-table-column>
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <!--<el-table-column type="index" label="序号" width="60"></el-table-column>-->
+            <el-table-column prop="stock_symbol" label="股票代码"></el-table-column>
+            <el-table-column prop="symbol_name" label="股票名称"></el-table-column>
+            <el-table-column prop="stock_ktype" label="K线类型"></el-table-column>
             <el-table-column prop="strategy_name" label="选股策略" width="240"></el-table-column>
-            <el-table-column label="操作" width="120">
+            <el-table-column label="操作" width="260">
                 <template slot-scope="scope">
+                    <el-button class="btn1" type="text" size="small" @click="addObject2Monitor(scope.row.stock_symbol)">加入任务监控</el-button>
                     <el-button class="btn1" type="text" size="small" @click="addObject2Monitor(scope.row.stock_symbol)">加入任务监控</el-button>
                 </template>
             </el-table-column>

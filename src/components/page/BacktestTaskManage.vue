@@ -7,7 +7,7 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建回测任务</el-button>
+            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">创建回测任务</el-button>
         </div>
         <el-table :data="task_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
@@ -16,12 +16,12 @@
             <el-table-column prop="obj_amount" label="操作量" width="80"></el-table-column>
             -->
             <el-table-column prop="task_type" label="任务类型" width="100"></el-table-column>
-            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
+            <el-table-column prop="trade_ktype" label="K线类型"></el-table-column>
             <el-table-column prop="strategy_name" label="策略标的" width="160"></el-table-column>
-            <el-table-column prop="start_time" label="开始时间" width="160"></el-table-column>
-            <el-table-column prop="end_time" label="结束时间" width="160"></el-table-column>
-            <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>
-            <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
+            <el-table-column prop="start_time" label="开始时间"></el-table-column>
+            <el-table-column prop="end_time" label="结束时间"></el-table-column>
+            <el-table-column prop="trade_symbol" label="交易标的"></el-table-column>
+            <el-table-column prop="task_status" label="运行状态"></el-table-column>
             <el-table-column label="操作" width="200">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="delTask(scope.row.task_id)">删除</el-button>

@@ -7,14 +7,14 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">添加计划任务</el-button>
+            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">添加计划任务</el-button>
         </div>
         <el-table :data="task_plan_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
-            <el-table-column prop="task_id" label="任务ID" width="320"></el-table-column>
-            <el-table-column prop="task_script" label="任务名称" width="160"></el-table-column>
-            <el-table-column prop="task_exce_time" label="任务执行时间" width="180"></el-table-column>
-            <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
+            <el-table-column prop="task_id" label="任务ID" width="220"></el-table-column>
+            <el-table-column prop="task_script" label="任务名称" width="200"></el-table-column>
+            <el-table-column prop="task_exce_time" label="执行时间"></el-table-column>
+            <el-table-column prop="task_status" label="运行状态"></el-table-column>
             <el-table-column prop="create_at" label="创建时间" width="180"></el-table-column>
             <el-table-column label="操作" width="120">
                 <template slot-scope="scope">

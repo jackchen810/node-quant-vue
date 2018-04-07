@@ -116,22 +116,6 @@
                 isValidTime0:false,
                 upgradeTime:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
                 rule_trade: {
-                    router_mac: [
-                        {required: true, message: '请输入指定MAC', trigger: 'blur'},
-                        {validator: this.validateMac, trigger: 'blur'}
-                    ],
-                    dev_type: [
-                        {required: true, message: '请选择设备型号', trigger: 'change'}
-                    ],
-                    dest_version: [
-                        {required: true, message: '请选择ROM版本', trigger: 'change'}
-                    ],
-                    upgrade_mode: [
-                        {required: true, message: '请选择升级方式', trigger: 'change'}
-                    ],
-                    reflash:[
-                        { required: true, message: '请选择配置更新', trigger: 'change'}
-                    ],
                     expired_time: [
                         {required: true, message: '请输入超时时间', trigger: 'blur'},
                         {validator: this.validateTimeNum, trigger: 'blur'}
@@ -151,11 +135,24 @@
             }
         },
         created:function () {
+            this.getSystemSetupList();
             this.getRiskCtrlList();
             this.getOrderGatewayList();
             this.getMarketGatewayList();
         },
         methods: {
+
+            getSystemSetupList: function(){//获取task列表
+                var self = this;
+                self.$axios.post('/api/system/setup/list').then(function(res){
+                    if(res.data.ret_code == 0){
+                        self.form_trade.order_gateway = res.data.extra.order_gateway;
+                        self.form_trade.riskctrl_name = res.data.extra.riskctrl_name;
+                        self.form_trade.market_gateway = res.data.extra.market_gateway;
+                    }
+                });
+                console.log('system_setup_list', self.system_setup_list);
+            },
             setupSubmit:function (formName) {
                 var self = this;
                 var params = {

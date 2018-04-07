@@ -7,19 +7,19 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建选股任务</el-button>
+            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">创建选股任务</el-button>
         </div>
         <el-table :data="task_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column type="index" label="ID" width="60"></el-table-column>
             <!--
+            <el-table-column type="index" label="ID" width="60"></el-table-column>
             <el-table-column prop="stock_name" label="股票名称" width="100"></el-table-column>
             <el-table-column prop="obj_amount" label="操作量" width="80"></el-table-column>
             -->
-            <el-table-column prop="task_type" label="任务类型" width="100"></el-table-column>
-            <el-table-column prop="stock_range" label="选股范围" width="100"></el-table-column>
-            <el-table-column prop="stock_ktype" label="K线类型" width="100"></el-table-column>
+            <el-table-column prop="task_id" label="任务ID" width="220"></el-table-column>
+            <el-table-column prop="stock_range" label="选股范围"></el-table-column>
+            <el-table-column prop="stock_ktype" label="K线类型"></el-table-column>
             <el-table-column prop="strategy_name" label="选股策略" width="220"></el-table-column>
-            <el-table-column prop="task_status" label="运行状态" width="95"></el-table-column>
+            <el-table-column prop="task_status" label="运行状态"></el-table-column>
             <el-table-column label="操作" width="200">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="delTask(scope.row.task_id)">删除</el-button>

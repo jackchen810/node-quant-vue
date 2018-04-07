@@ -67,6 +67,7 @@
                             }
                         ]
                     },
+                    /*
                     {
                         icon: 'el-icon-menu',
                         index: '3',
@@ -81,9 +82,9 @@
                                 title: '买卖点统计'
                             },
                         ]
-                    },
+                    },*/
                     {
-                        icon: 'el-icon-menu',
+                        icon: 'el-icon-service',
                         index: '4',
                         title: '交易任务管理',
                         subs: [
@@ -117,7 +118,7 @@
                         ]
                     },
                     {
-                        icon: 'el-icon-share',
+                        icon: 'el-icon-refresh',
                         index: '6',
                         title: '回测系统管理',
                         subs: [
@@ -137,7 +138,7 @@
                         ]
                     },
                     {
-                        icon: 'el-icon-document',
+                        icon: 'el-icon-edit',
                         index: '7',
                         title: '历史数据管理',
                         subs: [

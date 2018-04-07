@@ -29,7 +29,7 @@
             <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
             <el-table-column prop="task_type" label="任务类型" width="100"></el-table-column>
             -->
-            <el-table-column prop="task_id" label="任务ID" width="300"></el-table-column>
+            <el-table-column prop="task_id" label="任务ID" width="220"></el-table-column>
             <el-table-column prop="trade_ktype" label="K线类型" width="80"></el-table-column>
             <el-table-column prop="strategy_name" label="交易策略" width="180"></el-table-column>
             <el-table-column prop="trade_symbol" label="交易标的" width="95"></el-table-column>

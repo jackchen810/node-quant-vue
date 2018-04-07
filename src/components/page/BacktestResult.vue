@@ -8,17 +8,17 @@
         </div>
 
         <el-table :data="result_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column type="index" label="ID" width="60"></el-table-column>
-            <el-table-column prop="trade_symbol" label="股票代码" width="100"></el-table-column>
-            <el-table-column prop="symbol_name" label="股票名称" width="100"></el-table-column>
-            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
+            <el-table-column type="index" label="序号"></el-table-column>
+            <el-table-column prop="trade_symbol" label="股票代码"></el-table-column>
+            <!--<el-table-column prop="symbol_name" label="股票名称" width="100"></el-table-column>-->
+            <el-table-column prop="trade_ktype" label="K线类型"></el-table-column>
             <el-table-column prop="strategy_name" label="交易策略" width="160"></el-table-column>
-            <el-table-column prop="order_point_at" label="买卖点时间" width="180"></el-table-column>
+            <el-table-column prop="order_point_at" label="买卖点时间" width="150"></el-table-column>
             <el-table-column prop="order_type" label="买卖点类型" width="160"></el-table-column>
-            <el-table-column prop="trade_price" label="交易价格" width="100"></el-table-column>
-            <el-table-column prop="trade_amount" label="交易数量" width="100"></el-table-column>
-            <el-table-column prop="profit_rate" label="收益率" width="100"></el-table-column>
-            <el-table-column prop="max_retracement" label="最大回撤率" width="120"></el-table-column>
+            <el-table-column prop="trade_price" label="交易价格"></el-table-column>
+            <el-table-column prop="trade_amount" label="交易数量"></el-table-column>
+            <el-table-column prop="profit_rate" label="收益率"></el-table-column>
+            <el-table-column prop="max_retracement" label="最大回撤率"></el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination

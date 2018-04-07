@@ -34,11 +34,11 @@
         <el-table :data="history_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="date" label="日期" width="180"></el-table-column>
             <el-table-column prop="code" label="股票代码" width="110"></el-table-column>
-            <el-table-column prop="open" label="开盘价" width="110"></el-table-column>
-            <el-table-column prop="close" label="收盘价" width="110"></el-table-column>
-            <el-table-column prop="high" label="最高价" width="110"></el-table-column>
-            <el-table-column prop="low" label="最低价" width="110"></el-table-column>
-            <el-table-column prop="volume" label="成交量" width="120"></el-table-column>
+            <el-table-column prop="open" label="开盘价"></el-table-column>
+            <el-table-column prop="close" label="收盘价"></el-table-column>
+            <el-table-column prop="high" label="最高价"></el-table-column>
+            <el-table-column prop="low" label="最低价"></el-table-column>
+            <el-table-column prop="volume" label="成交量"></el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
