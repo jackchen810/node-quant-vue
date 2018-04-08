@@ -9,11 +9,8 @@
         <div class="handle-box rad-group">
             <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">加入任务监控</el-button>
         </div>
-        <el-table :data="result_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column
-                    type="selection"
-                    width="55">
-            </el-table-column>
+        <el-table :data="result_list" border style="width: 100%" ref="multipleTable" v-loading="loading" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="55" ></el-table-column>
             <!--<el-table-column type="index" label="序号" width="60"></el-table-column>-->
             <el-table-column prop="stock_symbol" label="股票代码"></el-table-column>
             <el-table-column prop="symbol_name" label="股票名称"></el-table-column>
@@ -34,7 +31,40 @@
                 :total="pageTotal">
             </el-pagination>
         </div>
-
+        <el-dialog title="加入任务监控" :visible.sync="dialogFormVisible" class="digcont">
+            <el-form :model="form" :rules="rules0" ref="form" label-width="150px">
+                <el-form-item label="绑定K 线周期">
+                    <el-select v-model="form.stock_ktype" class="inp180" placeholder="请选择K线周期">
+                        <el-option label="1分钟" value="1"></el-option>
+                        <el-option label="5分钟" value="5"></el-option>
+                        <el-option label="15分钟" value="15"></el-option>
+                        <el-option label="30分钟" value="30"></el-option>
+                        <el-option label="60分钟" value="60"></el-option>
+                        <el-option label="120分钟" value="120"></el-option>
+                        <el-option label="日线" value="day"></el-option>
+                        <el-option label="周线" value="week"></el-option>
+                        <el-option label="月线" value="month"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="绑定交易策略" prop="strategy_name">
+                    <el-select v-model="form.strategy_name" class="inp180" placeholder="请选择对应策略">
+                        <el-option
+                                v-for="item in strategy_file_list"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="监控股票列表" prop="strategy_name">
+                    <el-input type="textarea" v-model="form.monitor_code_list_str" class="inp200" auto-complete="off" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button @click="dialogFormVisible = false">退 出</el-button>
+                    <el-button type="primary" @click="saveAdd('form')">确 定</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
     </div>
 </template>
 
@@ -44,10 +74,31 @@
         data: function(){
             const self = this;
             return {
+                multipleTable:[],
                 search_word:'',
-                result_list:[],
-
+                dialogFormVisible:false,
+                fullscreenLoading: false,
                 loading:true,
+                form: {
+                    task_id:'',
+                    task_status:'',
+                    strategy_name: '',
+                    stock_ktype: '',
+                    monitor_code_list: [],
+                    monitor_name_list: [],
+                    monitor_code_list_str: '',
+                },
+                rules0: {
+                    start_time:[
+                        {required: true, message: '请输入开始时间', trigger: 'blur'},
+                    ],
+                    end_time:[
+                        {required: true, message: '请输入结束时间', trigger: 'blur'}
+                    ],
+                },
+
+                result_list:[],
+                strategy_file_list:[],
 
                 pageTotal:1,
                 currentPage:1,
@@ -58,6 +109,7 @@
         created:function(){
             this.getPickstockResultList(1, this.page_size);
             this.getPickstockResultListLength();
+            this.getStrategyList();
         },
         methods: {
             getPickstockResultListLength: function(){//获取task列表
@@ -91,18 +143,52 @@
                     }
                 })
             },
-            addObject2Monitor: function(){//获取task列表
+            getStrategyList: function(){//获取rom列表
                 var self = this;
-                var params = {
-                    stock_symbol: this.form.stock_symbol,
-                    stock_ktype: this.form.stock_ktype,
-                };
                 self.loading = true;
-                self.$axios.post('/api/monitor/task/add', params).then(function(res){
+                self.$axios.post('/api/strategy/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra;
+                        self.strategy_file_list = res.data.extra;
                     }
+                    else{
+                        console.log('resp:', res.data)
+                    }
+                })
+            },
+            addObject2Monitor: function(){//获取task列表
+                var self = this;
+            },
+            handleSelectionChange: function(val) {
+                var self = this;
+                self.$message('添加1111---', val);
+                self.form.monitor_code_list = val;
+                self.form.monitor_code_list_str = self.form.monitor_code_list.join();
+            },
+            saveAdd: function(formName){
+                var self = this;
+                var params = {
+                    task_type:'monitor',
+                    strategy_type:'1',  //简单策略
+                    monitor_code_list:self.form.monitor_code_list,
+                    monitor_name_list:self.form.monitor_name_list,
+                    strategy_name:self.form.strategy_name,
+                    stock_ktype:self.form.stock_ktype,
+                };
+                self.loading = true;
+                self.$axios.post('/api/task/add/monitor', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message('添加成功');
+                    }
+                    else{
+                        self.$message('添加失败:' + res.data.extra);
+                    }
+
+                },function(err){
+                    self.$message('添加失败');
+                    self.loading = false;
+                    console.log(err);
                 })
             },
             handleCurrentChange:function(val){

@@ -237,7 +237,7 @@
             }
 
             this.getTaskListByTrade(1, this.page_size);
-            this.getTaskListLength();
+            //this.getTaskListLengthByTrade();
             this.getStrategyList();
             this.getSystemSetupList();
         },
@@ -278,10 +278,10 @@
 
                 console.log('system_setup_list', self.system_setup_list);
             },
-            getTaskListLength: function(){//获取task列表
+            getTaskListLength: function(filter){//获取task列表
                 var self = this;
                 var params = {
-                    filter: {task_type: 'trade'},
+                    filter: filter,
                 };
                 self.loading = true;
                 self.$axios.post('/api/task/list/length', params).then(function(res){
@@ -311,9 +311,17 @@
             },
             getTaskListByTrade: function(current_page, page_size){//获取task列表
                 this.getTaskList(current_page, page_size, {task_type: 'trade'});
+                this.getTaskListLengthByTrade();
+            },
+            getTaskListLengthByTrade: function(){
+                this.getTaskListLength({task_type: 'trade'});
             },
             getTaskListByMonitor: function(current_page, page_size){//获取task列表
                 this.getTaskList(current_page, page_size, {task_type: 'monitor'});
+                this.getTaskListLengthByMonitor();
+            },
+            getTaskListLengthByMonitor: function(){
+                this.getTaskListLength({task_type: 'monitor'});
             },
             getTaskPrice: function(){//获取task列表
                 var self = this;
@@ -410,7 +418,6 @@
                 self.loading = true;
                 self.$axios.post('/api/task/add', params).then(function(res){
                     self.loading = false;
-                    console.log(res);
                     if(res.data.ret_code == 0){
                         self.$message('添加成功');
                         self.getTaskListByTrade(1, self.page_size);
@@ -608,7 +615,7 @@
     .handle-input{  width: 300px;  display: inline-block;  }
     .handle-box2{display:inline-block;float:right;}
     /*.el-table_1_column_5{color:#eb9e05;}*/
-    .orange{color:#eb9e05;background-color:none;}
+    .orange{color:#eb9e05;background-color:yellow;}
     .btn2{margin-bottom:5px;margin-left:0;}
     .diainp{width:217px;}
     .diainp2{width:400px;}
