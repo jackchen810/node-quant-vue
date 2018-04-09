@@ -8,6 +8,11 @@
         </div>
         <div class="handle-box rad-group">
             <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">加入任务监控</el-button>
+            <el-form :inline="true" class="handle-box2">
+                <el-form-item>
+                    <el-button type="primary" class="handle-del mr10" @click="page_forward_monitor">查看监控任务</el-button>
+                </el-form-item>
+            </el-form>
         </div>
         <el-table :data="result_list" border style="width: 100%" ref="multipleTable" v-loading="loading" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" ></el-table-column>
@@ -18,8 +23,7 @@
             <el-table-column prop="strategy_name" label="选股策略" width="240"></el-table-column>
             <el-table-column label="操作" width="260">
                 <template slot-scope="scope">
-                    <el-button class="btn1" type="text" size="small" @click="addObject2Monitor(scope.row.stock_symbol)">加入任务监控</el-button>
-                    <el-button class="btn1" type="text" size="small" @click="addObject2Monitor(scope.row.stock_symbol)">加入任务监控</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="add_object_2monitor(scope.row)">加入任务监控</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -57,7 +61,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="监控股票列表" prop="strategy_name">
-                    <el-input type="textarea" v-model="form.monitor_code_list_str" class="inp200" auto-complete="off" :disabled="true"></el-input>
+                    <el-input type="textarea" v-model="monitor_code_list_str" class="inp200" auto-complete="off" :disabled="true"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button @click="dialogFormVisible = false">退 出</el-button>
@@ -75,7 +79,6 @@
             const self = this;
             return {
                 multipleTable:[],
-                search_word:'',
                 dialogFormVisible:false,
                 fullscreenLoading: false,
                 loading:true,
@@ -84,9 +87,8 @@
                     task_status:'',
                     strategy_name: '',
                     stock_ktype: '',
-                    monitor_code_list: [],
-                    monitor_name_list: [],
-                    monitor_code_list_str: '',
+                    monitor_obj_list: [],
+                    //monitor_name_list: [],
                 },
                 rules0: {
                     start_time:[
@@ -97,6 +99,7 @@
                     ],
                 },
 
+                monitor_code_list_str: '',
                 result_list:[],
                 strategy_file_list:[],
 
@@ -156,22 +159,12 @@
                     }
                 })
             },
-            addObject2Monitor: function(){//获取task列表
-                var self = this;
-            },
-            handleSelectionChange: function(val) {
-                var self = this;
-                self.$message('添加1111---', val);
-                self.form.monitor_code_list = val;
-                self.form.monitor_code_list_str = self.form.monitor_code_list.join();
-            },
             saveAdd: function(formName){
                 var self = this;
                 var params = {
                     task_type:'monitor',
                     strategy_type:'1',  //简单策略
-                    monitor_code_list:self.form.monitor_code_list,
-                    monitor_name_list:self.form.monitor_name_list,
+                    monitor_obj_list:self.form.monitor_obj_list,
                     strategy_name:self.form.strategy_name,
                     stock_ktype:self.form.stock_ktype,
                 };
@@ -190,6 +183,26 @@
                     self.loading = false;
                     console.log(err);
                 })
+            },
+            add_object_2monitor: function(row){//获取task列表
+                var self = this;
+                self.dialogFormVisible = true;
+                self.$refs.multipleTable.clearSelection();
+                self.$refs.multipleTable.toggleRowSelection(row);
+            },
+            page_forward_monitor: function(){//task detail操作
+                this.$router.push({name:'TradeTaskManage', params :{task_type: 'monitor'}});
+            },
+            handleSelectionChange: function(val) {
+                var self = this;
+                self.form.monitor_obj_list = val;
+                //self.monitor_code_list_str = val.toString();
+                self.monitor_code_list_str = '';
+                for (var i = 0; i < val.length; i++){
+                    self.monitor_code_list_str += val[i]['stock_symbol'];
+                    self.monitor_code_list_str += ';';
+                }
+                //self.$message('handleSelectionChange:'+ self.monitor_code_list_str);
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;

@@ -236,7 +236,14 @@
                 this.updateTimer = '';
             }
 
-            this.getTaskListByTrade(1, this.page_size);
+            //通过选股任务跳转
+            if (this.getTaskType == 'monitor'){
+                this.form.task_type_radio = 'monitor';
+                this.getTaskListByMonitor(1, this.page_size);
+            }
+            else{
+                this.getTaskListByTrade(1, this.page_size);
+            }
             //this.getTaskListLengthByTrade();
             this.getStrategyList();
             this.getSystemSetupList();
@@ -604,7 +611,20 @@
             }
         },
         computed:{
-
+            getTaskType() {
+                //因为在main.js中已经全局注册了store，所以这里直接用this.$直接使用。
+                return this.$route.params.task_type;
+                /*
+                //this.$message('操作'+ this.params_task_id);
+                if (typeof(task_type) === "undefined") {
+                    task_type = localStorage.getItem('trade_task_type');
+                }
+                else {
+                    localStorage.setItem('trade_task_type', task_type);
+                }
+                return task_type;
+                */
+            }
         }
     }
 </script>

@@ -50,6 +50,7 @@ export default new Router({
                 /////交易系统管理
                 {
                     path: '/task/manage',
+                    name: 'TradeTaskManage',
                     component: resolve => require(['../components/page/TradeTaskManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
@@ -66,6 +67,7 @@ export default new Router({
                     component: resolve => require(['../components/page/TradeTaskDetail.vue'], resolve)     // vue-datasource组件
                 },
                 /////监测系统管理
+                /*
                 {
                     path: '/monitor/manage',
                     name: 'MonitorTaskManage',
@@ -76,6 +78,7 @@ export default new Router({
                     name: 'MonitorBuySell',
                     component: resolve => require(['../components/page/MonitorBuySellPoint.vue'], resolve)     // vue-datasource组件
                 },
+                */
                 /////选股系统管理
                 {
                     path: '/select/manage',
