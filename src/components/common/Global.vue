@@ -1,6 +1,7 @@
 <script>
-    var uniUrl = 'https://wifi.kunteng.org';
-    var baseUrl = 'http://127.0.0.1';
+    var config = require('../../../config');
+    //var uniUrl = 'https://wifi.kunteng.org';
+    var baseUrl = config.build.webServer;
     //时间转换
     function timeStamp( second_time ){
         var time = parseInt(second_time) + "秒";
@@ -1198,9 +1199,7 @@
         }
     ];
     export default {
-        uniUrl,
         baseUrl,
-        timeStamp,
         provs,
         allCity
     }

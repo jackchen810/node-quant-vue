@@ -23,7 +23,7 @@
 
 <script>
     import axios from 'axios';
-    import global_ from 'components/common/Global';
+    //import global_ from 'components/common/Global';
     export default {
         data: function(){
             return {
@@ -58,7 +58,7 @@
             },
             getUser: function(){
                 var self = this;
-                self.$axios.post(global_.baseUrl+'/admin/info').then(function(res){
+                self.$axios.post('api/admin/info').then(function(res){
                     if(res.data.ret_code == 0){
                         localStorage.setItem('userMsg',res.data.ret_msg);
                         if(res.data.ret_msg == '1'){//普通管理员
@@ -75,7 +75,7 @@
                             user_account: self.ruleForm.username,
                             user_password: self.ruleForm.password
                         };
-                        self.$axios.post(global_.baseUrl + '/admin/login',params).then(function(res){
+                        self.$axios.post( 'api/admin/login',params).then(function(res){
                             // console.log(res);
                             if(res.data.ret_code == 0){
                                 self.$message({message:'登录成功！',type:'success'});

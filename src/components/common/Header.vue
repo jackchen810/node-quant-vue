@@ -37,11 +37,11 @@
     </div>
 </template>
 <script>
-    import global_ from 'components/common/Global';
+    //import global_ from 'components/common/Global';
     export default {
-        data() {
+        data: function(){
             return {
-                name: 'linxin',
+                name: 'chenzejun',
 
                 showDialogPwd: false,
                 form:{
@@ -89,7 +89,7 @@
                             user_password:self.form.user_password,
                             user_new_password: self.form.user_new_password
                         };
-                        self.$axios.post(global_.baseUrl+'/admin/change',params).then(function(res){
+                        self.$axios.post('api/admin/change',params).then(function(res){
                             if(res.data.ret_code == 0){
                                 self.showDialogPwd = false;
                                 self.$message({message:res.data.extra,type:'success'})
@@ -129,7 +129,7 @@
                     self.showDialogPwd = true;
                 }
                 if(command == 'loginout'){
-                    self.$axios.post(global_.baseUrl+'/admin/logout').then(function(res){
+                    self.$axios.post('api/admin/logout').then(function(res){
                         if(res.data.ret_code == 0){
                             self.$message({message:res.data.extra,type:'success'});
                             localStorage.removeItem('ms_username');

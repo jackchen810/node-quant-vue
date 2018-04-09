@@ -94,7 +94,7 @@
 </template>
 
 <script>
-    import global_ from 'components/common/Global';
+    //import global_ from 'components/common/Global';
     var crypto = require('crypto');
     export default {
         data: function () {

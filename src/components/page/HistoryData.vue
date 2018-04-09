@@ -52,7 +52,7 @@
 </template>
 
 <script>
-    import global_ from 'components/common/Global';
+    //import global_ from 'components/common/Global';
     export default {
         data: function(){
             return {
