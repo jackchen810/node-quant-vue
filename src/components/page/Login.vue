@@ -1,6 +1,6 @@
 <template>
     <div class="login-wrap">
-        <div class="ms-title">坤腾物联网管理平台</div>
+        <div class="ms-title">iotks管理平台</div>
         <div class="ms-login">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="demo-ruleForm">
                 <el-form-item prop="username">
@@ -58,7 +58,7 @@
             },
             getUser: function(){
                 var self = this;
-                self.$axios.post('api/admin/info').then(function(res){
+                self.$axios.post('/api/admin/info').then(function(res){
                     if(res.data.ret_code == 0){
                         localStorage.setItem('userMsg',res.data.ret_msg);
                         if(res.data.ret_msg == '1'){//普通管理员
@@ -75,13 +75,13 @@
                             user_account: self.ruleForm.username,
                             user_password: self.ruleForm.password
                         };
-                        self.$axios.post( 'api/admin/login',params).then(function(res){
+                        self.$axios.post('/api/admin/login',params).then(function(res){
                             // console.log(res);
                             if(res.data.ret_code == 0){
                                 self.$message({message:'登录成功！',type:'success'});
                                 localStorage.setItem('ms_username',self.ruleForm.username);
                                 self.getUser();
-                                self.$router.push('/basetable')
+                                self.$router.push('/task/manage')
                             }else{
                                 self.$message(res.data.extra);
                             }

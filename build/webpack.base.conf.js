@@ -4,7 +4,7 @@ var webpack = require('webpack')
 var config = require('../config')
 var vueLoaderConfig = require('./vue-loader.conf')
 
-//ȥ���澯
+//去掉告警
 //(node:15300) DeprecationWarning: loaderUtils.parseQuery() received a non-string value which can be problematic
 process.noDeprecation = true;
 

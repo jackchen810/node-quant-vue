@@ -20,20 +20,20 @@ module.exports = {
         // `npm run build --report`
         // Set to `true` or `false` to always turn it on or off
         bundleAnalyzerReport: process.env.npm_config_report,
-        webServer: '127.0.0.1'
+        webServer: '127.0.0.1:8000'
     },
-    dev: {
+    dev: {   //开发环境会有跨域问题
         env: require('./dev.env'),
-        port: 8000,
+        port: 80,
         autoOpenBrowser: true,
         assetsSubDirectory: 'static',
         assetsPublicPath: '/',
         proxyTable: {
             '/api':{
-                target:'http://127.0.0.1:80',
+                target:'http://127.0.0.1:8000',
                 changeOrigin:true,
                 pathRewrite:{
-                    '^/api':''
+                    '^/api':'/api'
                 }
             },
 
