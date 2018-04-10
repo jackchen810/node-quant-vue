@@ -38,8 +38,8 @@
         -->
         <div class='rad-group'>
             <el-radio-group v-model="form.task_type_radio" @change="changeTab">
-                <el-radio-button label="trade">自动交易任务</el-radio-button>
-                <el-radio-button label="monitor">买卖点监控任务</el-radio-button>
+                <el-radio-button label="trade">自动化交易任务</el-radio-button>
+                <el-radio-button label="monitor">机器人盯盘任务</el-radio-button>
             </el-radio-group>
             <el-form :inline="true" class="handle-box2">
                 <el-form-item label="">
@@ -61,7 +61,7 @@
            -->
             <el-table-column prop="task_type_radio" label="任务类型" width="110">
                 <template slot-scope="scope">
-                    <el-tag type="primary">{{form.task_type_radio == 'trade'?'自动交易':'买卖点监控'}}</el-tag>
+                    <el-tag type="primary">{{form.task_type_radio == 'trade'?'自动化交易':'机器人盯盘'}}</el-tag>
                 </template>
             </el-table-column>
             <el-table-column prop="task_id" label="任务ID" width="220"></el-table-column>
@@ -91,7 +91,7 @@
                 <el-form-item label="" prop="task_type_radio" :inline="true":label-width="formLabelWidth">
                         <el-radio-group v-model="form.task_type_radio">
                             <el-radio label="trade">自动化交易</el-radio>
-                            <el-radio label="monitor">买卖点监控</el-radio>
+                            <el-radio label="monitor">机器人盯盘</el-radio>
                         </el-radio-group>
                 </el-form-item>
                 <el-form-item label="策略名称" prop="strategy_list" :label-width="formLabelWidth"
