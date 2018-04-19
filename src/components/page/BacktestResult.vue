@@ -51,9 +51,9 @@
         },
         created:function(){
             this.getBacktestResultList(1, this.page_size);
-            this.getBacktestResultListLength();
         },
         methods: {
+            /*
             getBacktestResultListLength: function(){//获取task列表
                 var self = this;
                 var params = {
@@ -67,6 +67,7 @@
                     }
                 })
             },
+            */
             getBacktestResultList: function(current_page, page_size){//获取backtest task列表
                 var self = this;
                 var params = {
@@ -79,9 +80,11 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.result_list = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.total;
                     }
                     else{
                         self.result_list = [];
+                        self.pageTotal = 1;
                     }
                 })
             },

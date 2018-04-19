@@ -97,9 +97,9 @@
         },
         created: function(){
             this.getHistoryList(1, this.page_size);
-            this.getHistoryListLength();
         },
         methods: {
+            /*
             getHistoryListLength: function(){//获取task列表
                 var self = this;
                 var params = {
@@ -114,9 +114,10 @@
                     }
                 })
             },
+            */
             getHistoryListByForm: function(form){
                 this.getHistoryList(1, this.page_size);
-                this.getHistoryListLength();
+                //this.getHistoryListLength();
             },
             getHistoryList: function(current_page, page_size){//获取task列表
                 var self = this;
@@ -133,6 +134,7 @@
                     if(res.data.ret_code == 0){
                         //self.pageTotal = res.data.extra.length;
                         self.history_list = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.total;
                     }
                     else{
                         self.history_list = []

@@ -10,13 +10,13 @@
         <el-table :data="result_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column type="index" label="ID" width="60"></el-table-column>
             <el-table-column prop="trade_symbol" label="股票代码" width="100"></el-table-column>
-            <el-table-column prop="symbol_name" label="股票名称" width="100"></el-table-column>
+            <el-table-column prop="symbol_name" label="股票名称" width="140"></el-table-column>
             <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
-            <el-table-column prop="strategy_name" label="交易策略" width="160"></el-table-column>
-            <el-table-column prop="order_point_at" label="买卖点时间" width="180"></el-table-column>
-            <el-table-column prop="order_type" label="买卖点类型" width="160"></el-table-column>
-            <el-table-column prop="trade_price" label="交易价格" width="100"></el-table-column>
+            <el-table-column prop="order_type" label="买卖点类型" width="140"></el-table-column>
             <el-table-column prop="trade_amount" label="交易数量" width="100"></el-table-column>
+            <el-table-column prop="trade_price" label="交易价格" width="100"></el-table-column>
+            <el-table-column prop="strategy_name" label="交易策略"></el-table-column>
+            <el-table-column prop="order_point_at" label="买卖点时间"></el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
@@ -49,9 +49,9 @@
         },
         created:function(){
             this.getTradePointList(1, this.page_size);
-            this.getTradePointListLength();
         },
         methods: {
+            /*
             getTradePointListLength: function(){//获取task列表
                 var self = this;
                 var params = {
@@ -65,6 +65,7 @@
                     }
                 })
             },
+            */
             getTradePointList: function(current_page, page_size){//获取backtest task列表
                 var self = this;
                 var params = {
@@ -77,6 +78,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.result_list = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.total;
                     }
                     else{
                         self.result_list = [];

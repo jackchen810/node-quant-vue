@@ -17,11 +17,11 @@ export default new Router({
                     path: '/',
                     component: resolve => require(['../components/page/Readme.vue'], resolve)
                 },
-                /*
+
                 {
                     path: '/basetable',
                     component: resolve => require(['../components/page/BaseTable.vue'], resolve)
-                },*/
+                },
                 /////系统管理
                 {
                     path: '/system/setup',

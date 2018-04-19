@@ -7,10 +7,10 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
-            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">加入任务监控</el-button>
+            <el-button type="primary" class="handle-del mr10" @click="page_forward_monitor">查看监控任务</el-button>
             <el-form :inline="true" class="handle-box2">
                 <el-form-item>
-                    <el-button type="primary" class="handle-del mr10" @click="page_forward_monitor">查看监控任务</el-button>
+                    <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">批量加入任务监控</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -35,7 +35,7 @@
                 :total="pageTotal">
             </el-pagination>
         </div>
-        <el-dialog title="加入任务监控" :visible.sync="dialogFormVisible" class="digcont">
+        <el-dialog title="批量加入任务监控" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form" :rules="rules0" ref="form" label-width="150px">
                 <el-form-item label="绑定K 线周期">
                     <el-select v-model="form.stock_ktype" class="inp180" placeholder="请选择K线周期">
@@ -111,10 +111,11 @@
         },
         created:function(){
             this.getPickstockResultList(1, this.page_size);
-            this.getPickstockResultListLength();
+            //this.getPickstockResultListLength();
             this.getStrategyList();
         },
         methods: {
+            /*
             getPickstockResultListLength: function(){//获取task列表
                 var self = this;
                 var params = {
@@ -128,6 +129,7 @@
                     }
                 })
             },
+            */
             getPickstockResultList: function(current_page, page_size){//获取backtest task列表
                 var self = this;
                 var params = {
@@ -140,6 +142,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.result_list = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.total;
                     }
                     else{
                         self.result_list = [];

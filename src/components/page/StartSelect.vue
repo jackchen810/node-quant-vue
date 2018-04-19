@@ -89,8 +89,9 @@
                 strategy_file_list:[],
                 pick_result_list:[],
 
-                pageTotal:0,
+                pageTotal:1,
                 currentPage:1,
+                page_size:10
             }
         },
         created:function(){

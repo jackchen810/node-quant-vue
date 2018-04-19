@@ -122,10 +122,11 @@
         created: function(){
 
             this.getTaskList(1, this.page_size);
-            this.getTaskListLength();
+            //this.getTaskListLength();
             this.getPickStrategyList();
         },
         methods: {
+            /*
             getTaskListLength: function(){//获取task列表
                 var self = this;
                 self.loading = true;
@@ -136,6 +137,7 @@
                     }
                 });
             },
+            */
             getTaskList: function(current_page, page_size){//获取backtest task列表
                 var self = this;
                 var params = {
@@ -147,6 +149,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.task_list = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.total;
                     }
                     else{
                         self.task_list = [];

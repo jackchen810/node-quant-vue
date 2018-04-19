@@ -285,6 +285,7 @@
 
                 console.log('system_setup_list', self.system_setup_list);
             },
+            /*
             getTaskListLength: function(filter){//获取task列表
                 var self = this;
                 var params = {
@@ -298,6 +299,7 @@
                     }
                 })
             },
+            */
             getTaskList: function(current_page, page_size, filter){//获取task列表
                 var self = this;
                 var params = {
@@ -310,6 +312,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.task_list = res.data.extra.slice(0, self.page_size);
+                        self.pageTotal = res.data.total;
                     }
                     else{
                         self.task_list = [];
@@ -318,17 +321,9 @@
             },
             getTaskListByTrade: function(current_page, page_size){//获取task列表
                 this.getTaskList(current_page, page_size, {task_type: 'trade'});
-                this.getTaskListLengthByTrade();
-            },
-            getTaskListLengthByTrade: function(){
-                this.getTaskListLength({task_type: 'trade'});
             },
             getTaskListByMonitor: function(current_page, page_size){//获取task列表
                 this.getTaskList(current_page, page_size, {task_type: 'monitor'});
-                this.getTaskListLengthByMonitor();
-            },
-            getTaskListLengthByMonitor: function(){
-                this.getTaskListLength({task_type: 'monitor'});
             },
             getTaskPrice: function(){//获取task列表
                 var self = this;

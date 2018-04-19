@@ -43,9 +43,10 @@
         },
         created: function(){
             this.getData(1, this.page_size);
-            this.getDataLength();
+            //this.getDataLength();
         },
         methods: {
+            /*
             getDataLength: function(){//获取task列表
                 var self = this;
                 self.loading = true;
@@ -56,6 +57,7 @@
                     }
                 });
             },
+            */
             getData: function(current_page, page_size){//获取rom列表
                 var self = this;
                 var params = {
@@ -68,8 +70,10 @@
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
                             self.listData = res.data.extra.slice(0,10);
+                            self.pageTotal = res.data.total;
                         }else{
                             self.listData = res.data.extra;
+                            self.pageTotal = res.data.total;
                         }
                     }
                 });
@@ -77,7 +81,6 @@
             handleCurrentChange:function(val){
                 this.currentPage = val;
                 this.getData(this.currentPage, this.page_size);
-                //this.getDataLength();
             },
             filterTag:function(value, row) {
                 return row.comment === value;

@@ -143,6 +143,7 @@
                 self.loading = true;
                 self.$axios.post('/api/download/plan/add', params).then(function(res){
                     self.loading = false;
+                    self.dialogFormVisible = false;
                     console.log(res);
                     if(res.data.ret_code == 0){
                         self.$message('添加成功');
@@ -156,7 +157,7 @@
                     self.$message('添加失败');
                     self.loading = false;
                     console.log(err);
-                })
+                });
 
             },
             delTask: function(task_id){//删除

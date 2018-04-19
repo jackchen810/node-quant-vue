@@ -1,6 +1,6 @@
 <template>
     <div class="header">
-        <div class="logo">IoTKS管理系统</div>
+        <div class="logo">NQTM管理系统</div>
         <div class="user-info">
             <el-dropdown trigger="click" @command="handleCommand">
                 <span class="el-dropdown-link">
@@ -131,12 +131,12 @@
                 if(command == 'loginout'){
                     self.$axios.post('api/admin/logout').then(function(res){
                         if(res.data.ret_code == 0){
-                            self.$message({message:res.data.extra,type:'success'});
-                            localStorage.removeItem('ms_username');
-                            localStorage.removeItem('userMsg');
+                            self.$message(res.data.ret_msg);
+                            //localStorage.removeItem('ms_username');
+                            //localStorage.removeItem('userMsg');
                             self.$router.push('/login');
                         }else{
-                            self.$message.error(res.data.extra);
+                            self.$message.error(res.data.ret_msg);
                         }
                     },function(err){
                         self.$message.error(err);

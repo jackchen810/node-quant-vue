@@ -53,10 +53,11 @@
         },
         created: function(){
             this.getTaskDetailList(1, this.page_size);
-            this.getTaskDetailListLength();
+            //this.getTaskDetailListLength();
         },
 
         methods: {
+            /*
             getTaskDetailListLength: function(){//获取task列表
                 var self = this;
                 var params = {
@@ -70,6 +71,7 @@
                     }
                 })
             },
+            */
             getTaskDetailList: function(current_page, page_size) {//获取task列表
                 var self = this;
                 var params = {
@@ -82,6 +84,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.task_list = res.data.extra.slice(0, self.page_size);
+                        self.pageTotal = res.data.total;
                         self.strategy_type = self.task_list[0].strategy_type;
                     }
                     else{
@@ -92,7 +95,7 @@
             handleCurrentChange:function(val){
                 this.currentPage = val;
                 this.getTaskDetailList(this.currentPage, this.page_size);
-                this.getTaskDetailListLength();
+                //this.getTaskDetailListLength();
             },
         },
         computed:{

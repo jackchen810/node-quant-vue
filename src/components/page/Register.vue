@@ -4,13 +4,13 @@
         <div class="ms-login">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm">
                 <el-form-item label="账号" prop="account">
-                    <el-input v-model="ruleForm.account" placeholder="请输入电话号码或邮箱"></el-input>
+                    <el-input v-model="ruleForm.account" placeholder="请输入用户名"></el-input>
                 </el-form-item>
                 <el-form-item label="密码" prop="password">
                     <el-input type="password" placeholder="密码" v-model="ruleForm.password" @keyup.enter.native="submitForm('ruleForm')"></el-input>
                 </el-form-item>
-                <el-form-item label="用户名" prop="name">
-                    <el-input v-model="ruleForm.name" placeholder="用户名"></el-input>
+                <el-form-item label="邮箱" prop="email">
+                    <el-input v-model="ruleForm.email" placeholder="邮箱"></el-input>
                 </el-form-item>
                 <el-form-item label="联系方式" prop="phone">
                     <el-input v-model="ruleForm.phone" placeholder="电话号码"></el-input>
@@ -48,7 +48,7 @@
                 ruleForm: {
                     account: '',
                     password: '',
-                    name:'',
+                    email:'',
                     phone:'',
                     city:'',
                     selectProv: '',
@@ -58,7 +58,7 @@
                 citys: [],
                 rules: {
                     account: [
-                        { required: true, message: '请输入电话号码或邮箱', trigger: 'blur' }
+                        { required: true, message: '请输入用户名', trigger: 'blur' }
                     ],
                     password: [
                         { required: true, message: '请输入密码', trigger: 'blur' },
@@ -71,8 +71,8 @@
                             }
                         }}
                     ],
-                    name: [
-                        { required: true, message: '请输入用户名', trigger: 'blur' }
+                    email: [
+                        { required: true, message: '请输入用邮箱', trigger: 'blur' }
                     ],
                     phone: [
                         { required: true, message: '请输入联系方式', trigger: 'blur' }
@@ -87,62 +87,27 @@
 //            this.getData();
         },
         methods: {
-            getData: function(){
-                var self = this;
-                console.log(global_.timeStamp('417865'));
-//                self.$axios({
-//                    method:'get',
-////                    header: { "content-type": "application/json" },
-//                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-//                    url:'https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo?wx=wlife' ,
-//                    data:{wx:'wlife'}
-//                }).then(function(response) {
-////                        response.data.pipe(fs.createWriteStream('ada_lovelace.jpg'))
-//                        console.log(response);
-//                    },function(err){
-////                        console.log(err);
-//                });
-                var params = {
-                    wx:'wlife'
-                };
-//                self.$axios.get('https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo',{params}).then(function(res){
-//                    console.log(res);
-//                })
-
-
-            },
             submitForm:function(formName) {
                 const self = this;
-                self.$refs[formName].validate(function(valid){
-                    if (valid) {
-                        var params = {
-                            user_account: self.ruleForm.account,
-                            user_password: self.ruleForm.password,
-                            user_name: self.ruleForm.name,
-                            user_phone:self.ruleForm.phone,
-                            user_city:self.ruleForm.selectProv + self.ruleForm.selectCity
-
-                        };
-                        console.log(params);
-                        self.$axios.post(global_.baseUrl + '/admin/register',params).then(function(res){
-                            console.log(res);
-                            if(res.data.ret_code == 0){
-                                self.$message('注册成功！');
-                                // localStorage.setItem('ms_username',self.ruleForm.account);
-                                // localStorage.setItem('storgePwd',self.ruleForm.password);
-//                        self.$router.push('/readme');
-                                self.$router.push('/login');
-                            }else{
-                                self.$message(res.data.extra);
-                            }
-
-                        },function(err){
-                            console.log(err);
-                        });
-                    } else {
-                        console.log('error submit!!');
-                        return false;
+                var params = {
+                    user_account: self.ruleForm.account,
+                    user_password: self.ruleForm.password,
+                    user_email: self.ruleForm.email,
+                    user_phone:self.ruleForm.phone,
+                    user_city:self.ruleForm.selectProv,
+                };
+                console.log(params);
+                self.$axios.post('/api/admin/register',params).then(function(res){
+                    console.log(res);
+                    if(res.data.ret_code == 0){
+                        self.$message('注册成功！');
+                        self.$router.push('/login');
+                    }else{
+                        self.$message(res.data.extra);
                     }
+
+                },function(err){
+                    console.log(err);
                 });
             },
             getProv: function(prov){

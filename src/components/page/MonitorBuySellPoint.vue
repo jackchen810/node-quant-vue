@@ -47,9 +47,10 @@
         },
         created:function(){
             this.getTradePointList(1, this.page_size);
-            this.getTradePointListLength();
+            //this.getTradePointListLength();
         },
         methods: {
+            /*
             getTradePointListLength: function(){//获取task列表
                 var self = this;
                 var params = {
@@ -63,6 +64,7 @@
                     }
                 })
             },
+            */
             getTradePointList: function(current_page, page_size){//获取backtest task列表
                 var self = this;
                 var params = {
@@ -75,6 +77,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.result_list = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.total;
                     }
                     else{
                         self.result_list = [];
