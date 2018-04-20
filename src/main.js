@@ -15,22 +15,36 @@ import "babel-polyfill";
 Vue.use(ElementUI);
 axios.defaults.withCredentials=true;
 
-// axios.interceptors.response.use((response) => {
-//     const data = response.data;
-//     // const err = new Error(data.description);
-//     switch (data.ret_code){
-//         case '1001':
-//             err.message = '请先登录';
-//             location.replace('/login');
-//                  return data
-//     }
-//
-//
-// })
 
+/**
+ * @file Axios的Vue插件（添加全局请求/响应拦截器）
+ */
 
+// 拦截request,设置全局请求为ajax请求
+/*
+axios.interceptors.request.use((config) => {
+    config.headers['X-Requested-With'] = 'XMLHttpRequest'
+    return config
+})
+*/
 
+// 拦截响应response，并做一些错误处理
 
+axios.interceptors.response.use((response) => {
+    const data = response.data;
+    //console.log('ret_msg', data.ret_msg, data.ret_code);
+    switch (data.ret_code){
+        case 2000: {
+            ///session 超时返回2000
+            //跳转到登录页面
+            router.replace({
+                path: '/login',
+                query: {redirect: router.currentRoute.fullPath}
+            })
+        }
+    }
+    return response;
+});
 
 
 Vue.prototype.$axios = axios;
@@ -39,3 +53,4 @@ new Vue({
     router,
     render: h => h(App)
 }).$mount('#app');
+

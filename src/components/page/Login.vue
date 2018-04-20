@@ -75,7 +75,7 @@
                         self.$message({message:'登录成功！',type:'success'});
                         self.$router.push('/task/manage');
                     }else{
-                        self.$message(res.data.extra);
+                        self.$message(res.data.ret_msg);
                     }
 
                 },function(err){

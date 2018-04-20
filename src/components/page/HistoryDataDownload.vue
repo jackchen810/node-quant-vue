@@ -2,8 +2,8 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-star-on"></i>数据管理</el-breadcrumb-item>
-                <el-breadcrumb-item>数据列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-star-on"></i>历史数据</el-breadcrumb-item>
+                <el-breadcrumb-item>下载任务列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">

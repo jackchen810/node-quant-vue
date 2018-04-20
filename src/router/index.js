@@ -116,11 +116,11 @@ export default new Router({
                 /////历史数据管理
                 {
                     path: '/data/manage',
-                    component: resolve => require(['../components/page/DataManage.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/HistoryDataDownload.vue'], resolve)     // vue-datasource组件
                 },
                 {
                     path: '/history/data',
-                    component: resolve => require(['../components/page/HistoryData.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/HistoryDataManage.vue'], resolve)     // vue-datasource组件
                 },
             ]
         },

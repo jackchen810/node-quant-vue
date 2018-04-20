@@ -28,11 +28,11 @@
                     {
                         icon: 'el-icon-menu',
                         index: '1',
-                        title: '渠道管理',
+                        title: '用户管理',
                         subs: [
                             {
                                 index: '/basetable',
-                                title: '渠道列表'
+                                title: '用户列表'
                             },
                         ]
                     },

@@ -2,7 +2,7 @@
     <div class="table" v-loading="loading2">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-menu"></i> 账户管理</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-menu"></i> 用户管理</el-breadcrumb-item>
                 <el-breadcrumb-item>用户列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -22,7 +22,7 @@
             </el-radio-group>
         </div>
         <el-table :data="userData" border style="width: 100%" ref="multipleTable" :empty-text="emptyMsg" v-loading="loading">
-            <el-table-column prop="user_account" label="账 号" width="150"></el-table-column>
+            <el-table-column prop="user_account" label="用户名称" width="150"></el-table-column>
             <el-table-column prop="user_phone" label="联系电话" width="130"></el-table-column>
             <el-table-column prop="user_email" label="邮箱"></el-table-column>
             <el-table-column prop="user_status" label="冻结状态" width="120">
@@ -30,7 +30,7 @@
                     <el-tag :type="scope.row.user_status == '1' ? 'warning' : 'success'" close-transition>{{scope.row.user_status=='1'?'已冻结':'未冻结'}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="渠道类型" width="140">
+            <el-table-column label="用户类型" width="140">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.user_type == '0' ? 'danger' : 'info'" close-transition>{{scope.row.user_type == '0'?'管理员':'用户'}}</el-tag>
                 </template>
@@ -180,19 +180,19 @@
                     user_account:account
                 };
                 self.loading = true;
-                self.$axios.post(global_.baseUrl+'/admin/revoke',params).then(function(res){
+                self.$axios.post('/api/admin/revoke',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
+                        self.$message({message:res.data.ret_msg, type:'warning'});
                         setTimeout(function(){
                             self.$router.replace('login');
                         },2000)
                     }
                     if(res.data.ret_code == 1){
-                        self.$message({message:res.data.extra,type:'warning'});
+                        self.$message({message:res.data.ret_msg,type:'warning'});
                     }
                     if(res.data.ret_code == 0){
-                        self.$message({message:res.data.extra,type:'success'});
+                        self.$message({message:res.data.ret_msg,type:'success'});
                         if(self.radio3 == 'all'){
                             self.getUsers({page_size:10,current_page:self.currentPage},'all');
                         }else{
@@ -213,16 +213,16 @@
                     user_account:account
                 };
                 self.loading = true;
-                self.$axios.post(global_.baseUrl+'/admin/restore',params).then(function(res){
+                self.$axios.post('/api/admin/restore',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
+                        self.$message({message:res.data.ret_msg,type:'warning'});
                         setTimeout(function(){
                             self.$router.replace('login');
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.$message({message:res.data.extra,type:'success'});
+                        self.$message({message:res.data.ret_msg,type:'success'});
                         var param = {};
                         if(self.radio3 == 'all'){
                             self.getUsers({page_size:10,current_page:self.currentPage},'all');
@@ -244,24 +244,24 @@
                 var params = {
                     user_account:user
                 };
-                self.$axios.post(global_.baseUrl+'/admin/switch',params).then(function(res){
+                self.$axios.post('/api/admin/switch',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
+                        self.$message({message:res.data.ret_msg,type:'warning'});
                         setTimeout(function(){
                             self.$router.replace('login');
                         },2000)
                     }
                     if(res.data.ret_code == '1003'){
-                        self.emptyMsg = res.data.extra;
+                        self.emptyMsg = res.data.ret_msg;
                     }
                     if(res.data.ret_code == 0){
-                        self.$message({message:res.data.extra,type:'success'});
+                        self.$message({message:res.data.ret_msg,type:'success'});
                         localStorage.setItem('ms_username',user);
                         localStorage.setItem('userMsg','1');
                         window.location.reload();
                     }else{
-                        self.$message.error(res.data.extra);
+                        self.$message.error(res.data.ret_msg);
                     }
                 })
             },
@@ -275,16 +275,16 @@
                 var params = {
                     user:self.search_word
                 };
-                self.$axios.post(global_.baseUrl+'/admin/query',params).then(function(res){
+                self.$axios.post('/api/admin/query',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
+                        self.$message({message:res.data.ret_msg,type:'warning'});
                         setTimeout(function(){
                             self.$router.replace('login');
                         },2000)
                     }
                     if(res.data.ret_code == '1003'){
-                        self.emptyMsg = res.data.extra;
+                        self.emptyMsg = res.data.ret_msg;
                     }
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
@@ -308,19 +308,19 @@
                     user_account:account
                 }
                 self.loading  = true;
-                self.$axios.post(global_.baseUrl+'/admin/reset',params).then(function(res){
+                self.$axios.post('/api/admin/reset',params).then(function(res){
                     self.loading  = false;
                     if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
+                        self.$message({message:res.data.ret_msg,type:'warning'});
                         setTimeout(function(){
                             self.$router.replace('login');
                         },2000)
                     }
                     if(res.data.ret_code == 0){
                         self.showDialogPwd = false;
-                        self.$message({message:res.data.extra,type:'success'})
+                        self.$message({message:res.data.ret_msg,type:'success'})
                     }else{
-                        self.$message.error(res.data.extra);
+                        self.$message.error(res.data.ret_msg);
                     }
                 },function(err){
                     self.loading  = false;
@@ -338,19 +338,19 @@
                             user_new_password: self.formP.user_new_password
                         };
                         self.fullscreenLoading  = true;
-                        self.$axios.post(global_.baseUrl+'/admin/change',params).then(function(res){
+                        self.$axios.post('/api/admin/change',params).then(function(res){
                             self.fullscreenLoading  = false;
                             if(res.data.ret_code == '1001'){
-                                self.$message({message:res.data.extra,type:'warning'});
+                                self.$message({message:res.data.ret_msg,type:'warning'});
                                 setTimeout(function(){
                                     self.$router.replace('login');
                                 },2000)
                             }
                             if(res.data.ret_code == 0){
                                 self.showDialogPwd = false;
-                                self.$message({message:res.data.extra,type:'success'})
+                                self.$message({message:res.data.ret_msg,type:'success'})
                             }else{
-                                self.$message.error(res.data.extra);
+                                self.$message.error(res.data.ret_msg);
                             }
                         },function(err){
                             self.fullscreenLoading  = false;
