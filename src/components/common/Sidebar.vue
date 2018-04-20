@@ -163,6 +163,7 @@
                 return;
             }
 
+            //如果是普通用户，去掉系统管理的操作
             for (var i = 0; i < this.items.length; i++) {
                 if (this.items[i].index == '2') {
                     this.items.splice(i, 1);

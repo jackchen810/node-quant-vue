@@ -1,12 +1,12 @@
 <template>
-    <div>
+    <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item><i class="el-icon-upload"></i> 系统管理</el-breadcrumb-item>
                 <el-breadcrumb-item>系统设置</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class='rad-group mb40'>
+        <div class='rad-group mb40' v-if="user_type =='0'?true:false">
             <el-tabs v-model="tabs_item" type="card" @tab-click="handleClick">
                 <el-tab-pane label="交易接口设置" name="1">
                     <div class="form-box tab-cont form-box2">
@@ -99,6 +99,7 @@
     export default {
         data: function () {
             return {
+                user_type:1,  //0:管理员, 1:用户
                 formLabelWidth: '100px',
                 formLabelWidth50: '50px',
                 form_trade: {
@@ -139,6 +140,7 @@
             this.getRiskCtrlList();
             this.getOrderGatewayList();
             this.getMarketGatewayList();
+            this.user_type = localStorage.getItem('user_type');  //管理员或用户
         },
         methods: {
 

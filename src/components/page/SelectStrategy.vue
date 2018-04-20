@@ -6,7 +6,7 @@
                 <el-breadcrumb-item>策略列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box rad-group" v-if="user_type =='0'?true:false">
+        <div class="handle-box rad-group">
             <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">创建交易策略</el-button>
         </div>
         <el-table :data="strategy_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
