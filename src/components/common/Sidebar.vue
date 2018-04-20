@@ -24,6 +24,7 @@
     export default {
         data: function() {
             return {
+                user_type:1,  //0:管理员, 1:用户
                 items: [
                     {
                         icon: 'el-icon-menu',
@@ -153,6 +154,19 @@
                         ]
                     },
                 ]
+            }
+        },
+        created: function(){
+            this.user_type = localStorage.getItem('user_type');  //管理员或用户
+
+            if (this.user_type == 0){
+                return;
+            }
+
+            for (var i = 0; i < this.items.length; i++) {
+                if (this.items[i].index == '2') {
+                    this.items.splice(i, 1);
+                }
             }
         },
         computed:{

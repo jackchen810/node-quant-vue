@@ -11,10 +11,10 @@
                 <el-input v-model="search_word" placeholder="请输入账号查找" class="handle-input mr10"></el-input>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" icon="search" :disabled="isSuper=='0'?false:true" @click="search">查询</el-button>
+                <el-button type="primary" icon="search" :disabled="user_type=='0'?false:true" @click="search">查询</el-button>
             </el-form-item>
         </el-form>
-        <div class='rad-group' v-if="isSuper =='0'?true:false">
+        <div class='rad-group' v-if="user_type =='0'?true:false">
             <el-radio-group v-model="radio3" @change="changeTab">
                 <el-radio-button label="all">全部</el-radio-button>
                 <el-radio-button label="0">未冻结</el-radio-button>
@@ -23,6 +23,8 @@
         </div>
         <el-table :data="userData" border style="width: 100%" ref="multipleTable" :empty-text="emptyMsg" v-loading="loading">
             <el-table-column prop="user_account" label="用户名称" width="150"></el-table-column>
+            <el-table-column prop="user_password" label="密码" width="150"></el-table-column>
+            <el-table-column prop="user_password_md5" label="密码MD5" width="150"></el-table-column>
             <el-table-column prop="user_phone" label="联系电话" width="130"></el-table-column>
             <el-table-column prop="user_email" label="邮箱"></el-table-column>
             <el-table-column prop="user_status" label="冻结状态" width="120">
@@ -39,10 +41,8 @@
             <el-table-column label="操作" width="380">
                 <template slot-scope="scope">
                     <!--<el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>-->
-                    <el-button class="btn1" size="small" type="text" @click="resetPassword(scope.row.user_account)">重置密码</el-button>
                     <el-button class="btn1" size="small" v-if="scope.row.user_status =='0' && scope.row.user_type =='1'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
                     <el-button class="btn1" size="small" v-else-if="scope.row.user_status =='1' && scope.row.user_type =='1'" @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
-                    <el-button class="btn1" size="small" v-if="scope.row.user_type =='1'?true:false" type="success" @click="toEnter(scope.row.user_account)">点击进入</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -64,7 +64,7 @@
         data: function() {
             return {
                 radio3:'all',
-                isSuper:localStorage.getItem('userMsg'),
+                user_type:1,  //0:管理员, 1:用户
                 loading2:false,
                 dialogFormVisible: false,
                 form: {
@@ -141,7 +141,11 @@
             }
         },
         created: function(){
-           this.getUsers(1, this.page_size);
+            this.getUsers(1, this.page_size);
+            this.user_type = localStorage.getItem('user_type');  //管理员或用户
+            //console.log('this.user_type', this.user_type);
+            //console.log('this.user_account', localStorage.getItem('user_account'));
+            //console.log('cookie', this.$cookie.get('user_type'));
         },
         methods: {
             getUsers: function(current_page, page_size, filter){//获取渠道列表
@@ -165,13 +169,10 @@
             },
             changeTab: function(){
                 var self = this;
-                var params = {};
-                self.currentPage = 1;
                 if(self.radio3 == 'all'){
-                    self.currentPage = 1;
-                    self.getUsers(params,'all');
+                    self.getUsers(1, self.page_size);
                 }else{
-                    self.getUsers({user_status:self.radio3},'status');
+                    self.getUsers(1, self.page_size, {user_status:self.radio3});
                 }
             },
             revoke: function(account){//冻结操作
@@ -182,24 +183,9 @@
                 self.loading = true;
                 self.$axios.post('/api/admin/revoke',params).then(function(res){
                     self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.ret_msg, type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == 1){
-                        self.$message({message:res.data.ret_msg,type:'warning'});
-                    }
                     if(res.data.ret_code == 0){
-                        self.$message({message:res.data.ret_msg,type:'success'});
-                        if(self.radio3 == 'all'){
-                            self.getUsers({page_size:10,current_page:self.currentPage},'all');
-                        }else{
-                            self.getUsers({user_status:self.radio3,page_size:10,current_page:self.currentPage},'status');
-                        }
+                        self.getUsers(1, self.page_size);
                     }
-
                 },function(err){
                     self.$message.error('操作失败');
                     self.loading = false;
@@ -215,55 +201,15 @@
                 self.loading = true;
                 self.$axios.post('/api/admin/restore',params).then(function(res){
                     self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.ret_msg,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
                     if(res.data.ret_code == 0){
-                        self.$message({message:res.data.ret_msg,type:'success'});
-                        var param = {};
-                        if(self.radio3 == 'all'){
-                            self.getUsers({page_size:10,current_page:self.currentPage},'all');
-                        }else{
-                            self.getUsers({user_status:self.radio3,page_size:10,current_page:self.currentPage},'status');
-                        }
+                        self.getUsers(1, self.page_size);
                     }
-
                 },function(err){
                     self.$message.error('操作失败');
                     self.loading = false;
                     console.log(err);
                 })
 
-            },
-            toEnter: function(user){
-                var self = this;
-                self.loading = true;
-                var params = {
-                    user_account:user
-                };
-                self.$axios.post('/api/admin/switch',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.ret_msg,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == '1003'){
-                        self.emptyMsg = res.data.ret_msg;
-                    }
-                    if(res.data.ret_code == 0){
-                        self.$message({message:res.data.ret_msg,type:'success'});
-                        localStorage.setItem('ms_username',user);
-                        localStorage.setItem('userMsg','1');
-                        window.location.reload();
-                    }else{
-                        self.$message.error(res.data.ret_msg);
-                    }
-                })
             },
             search: function(){
                 var self = this;
@@ -273,95 +219,17 @@
                 }
                 self.loading = true;
                 var params = {
-                    user:self.search_word
+                    user_account:self.search_word
                 };
-                self.$axios.post('/api/admin/query',params).then(function(res){
+                self.$axios.post('/api/admin/list',params).then(function(res){
                     self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.ret_msg,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == '1003'){
-                        self.emptyMsg = res.data.ret_msg;
-                    }
                     if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.data.length;
-                            self.userData = res.data.data.slice(0,10);
-                        }else{
-                            self.userData = res.data.data;
-                        }
-                    }
-                })
-
-            },
-            resetPwd: function(account){
-                var self = this;
-                self.showDialogPwd = true;
-                self.curAccount = account;
-            },
-            resetPassword:function(account){
-                var self = this;
-                var params = {
-                    user_account:account
-                }
-                self.loading  = true;
-                self.$axios.post('/api/admin/reset',params).then(function(res){
-                    self.loading  = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.ret_msg,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == 0){
-                        self.showDialogPwd = false;
-                        self.$message({message:res.data.ret_msg,type:'success'})
+                        self.userData = res.data.extra.slice(0, self.page_size);
+                        self.pageTotal = res.data.total;
                     }else{
-                        self.$message.error(res.data.ret_msg);
-                    }
-                },function(err){
-                    self.loading  = false;
-                    self.$message.error(err);
-                })
-
-            },
-            savePwdChange: function(formName){
-                var self = this;
-                self.$refs[formName].validate(function(valid){
-                    if(valid){
-                        var params = {
-                            user_account: self.curAccount,
-                            user_password:self.formP.user_password,
-                            user_new_password: self.formP.user_new_password
-                        };
-                        self.fullscreenLoading  = true;
-                        self.$axios.post('/api/admin/change',params).then(function(res){
-                            self.fullscreenLoading  = false;
-                            if(res.data.ret_code == '1001'){
-                                self.$message({message:res.data.ret_msg,type:'warning'});
-                                setTimeout(function(){
-                                    self.$router.replace('login');
-                                },2000)
-                            }
-                            if(res.data.ret_code == 0){
-                                self.showDialogPwd = false;
-                                self.$message({message:res.data.ret_msg,type:'success'})
-                            }else{
-                                self.$message.error(res.data.ret_msg);
-                            }
-                        },function(err){
-                            self.fullscreenLoading  = false;
-                            self.$message.error(err);
-                        })
-                    }else {
-                        console.log('error submit!!');
-                        return false;
+                        self.userData = [];
                     }
                 })
-
 
             },
             validateRepwd: function(rule,value,callback){

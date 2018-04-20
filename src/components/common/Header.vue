@@ -38,6 +38,7 @@
 </template>
 <script>
     //import global_ from 'components/common/Global';
+    var crypto = require('crypto');
     export default {
         data: function(){
             return {
@@ -80,33 +81,31 @@
             }
         },
         methods:{
+            getmd5(password){
+                var md5Hash = crypto.createHash("md5");
+                var md5Value = md5Hash.update(password).digest('hex');
+                return md5Value;
+            },
+
             saveChange: function(formName){
                 var self = this;
-                self.$refs[formName].validate(function(valid){
-                    if(valid){
-                        var params = {
-                            user_account: self.form.user_account,
-                            user_password:self.form.user_password,
-                            user_new_password: self.form.user_new_password
-                        };
-                        self.$axios.post('api/admin/change',params).then(function(res){
-                            if(res.data.ret_code == 0){
-                                self.showDialogPwd = false;
-                                self.$message({message:res.data.extra,type:'success'})
-                            }else{
-                                self.$message.error(res.data.extra);
-                            }
-                        },function(err){
-//                    self.loading = false;
-                            self.$message.error(err);
-                        })
-                    }else {
-                        console.log('error submit!!');
-                        return false;
+                var params = {
+                    user_account: self.form.user_account,
+                    //user_password:self.form.user_password,
+                    user_password: self.getmd5(self.ruleForm.password),
+                    user_new_password: self.form.user_new_password
+                };
+                self.$axios.post('api/admin/change',params).then(function(res){
+                    if(res.data.ret_code == 0){
+                        self.showDialogPwd = false;
+                        self.$message({message:res.data.ret_msg,type:'success'})
+                    }else{
+                        self.$message.error(res.data.ret_msg);
                     }
+                },function(err){
+//                    self.loading = false;
+                    self.$message.error(err);
                 })
-
-
             },
             validateRepwd: function(rule,value,callback){
                 if(value !== this.form.user_new_password){

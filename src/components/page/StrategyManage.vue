@@ -6,8 +6,8 @@
                 <el-breadcrumb-item>策略列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box rad-group">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建交易策略</el-button>
+        <div class="handle-box rad-group" v-if="user_type =='0'?true:false">
+            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">创建交易策略</el-button>
         </div>
         <el-table :data="strategy_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="file_name" label="策略名称" width="250"></el-table-column>
@@ -59,7 +59,7 @@
     export default {
         data: function(){
             return {
-
+                user_type:1,  //0:管理员, 1:用户
                 form: {
                     file_name:'',
                     alias_name:'',
@@ -84,6 +84,7 @@
         },
         created: function(){
             this.getStrategyList();
+            this.user_type = localStorage.getItem('user_type');  //管理员或用户
         },
         methods: {
             getStrategyList: function(){//获取rom列表

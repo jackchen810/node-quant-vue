@@ -70,9 +70,10 @@
                     //user_password: self.encode(self.ruleForm.password)
                 };
                 self.$axios.post('/api/admin/login',params).then(function(res){
-                    // console.log(res);
                     if(res.data.ret_code == 0){
-                        self.$message({message:'登录成功！',type:'success'});
+                        self.$message({message:'登录成功！', type:'success'});
+                        localStorage.setItem('user_type', res.data.extra);
+                        localStorage.setItem('user_account', self.ruleForm.username,);
                         self.$router.push('/task/manage');
                     }else{
                         self.$message(res.data.ret_msg);

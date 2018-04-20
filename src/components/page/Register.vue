@@ -103,7 +103,7 @@
                         self.$message('注册成功！');
                         self.$router.push('/login');
                     }else{
-                        self.$message(res.data.extra);
+                        self.$message(res.data.ret_msg);
                     }
 
                 },function(err){

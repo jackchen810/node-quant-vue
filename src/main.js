@@ -7,10 +7,13 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css'
  //import '../static/css/theme-green/index.css';       // 浅绿色主题
 import "babel-polyfill";
-
+//const VueCookie = require('vue-cookie');
 
 //var echarts = import('echarts');
 //Vue.use(echarts);  //自定义vue全局组件use使用
+
+// Tell Vue to use the plugin
+//Vue.use(VueCookie);
 
 Vue.use(ElementUI);
 axios.defaults.withCredentials=true;
