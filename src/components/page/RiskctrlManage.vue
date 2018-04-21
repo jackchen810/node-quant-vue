@@ -6,7 +6,7 @@
                 <el-breadcrumb-item>风控列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box rad-group" v-if="user_type =='0'?true:false">
+        <div class="handle-box rad-group" v-if="isShow">
             <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">创建风控模型</el-button>
         </div>
         <el-table :data="riskctrl_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
@@ -61,6 +61,7 @@
         data: function(){
             return {
                 user_type:1,  //0:管理员, 1:用户
+                isShow:false,
                 form: {
                     file_name:'',
                 },
@@ -84,6 +85,7 @@
         created: function(){
             this.getRiskCtrlList();
             this.user_type = localStorage.getItem('user_type');  //管理员或用户
+            this.isShow = this.user_type =='1'?false:true;
         },
         methods: {
 

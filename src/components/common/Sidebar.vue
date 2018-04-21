@@ -25,7 +25,8 @@
         data: function() {
             return {
                 user_type:1,  //0:管理员, 1:用户
-                items: [
+                items:[],
+                items_admin:[
                     {
                         icon: 'el-icon-menu',
                         index: '1',
@@ -37,7 +38,7 @@
                             },
                         ]
                     },
-		            {
+                    {
                         icon: 'el-icon-date',
                         index: '2',
                         title: '系统管理',
@@ -68,22 +69,37 @@
                             }
                         ]
                     },
-                    /*
+                ],
+                items_user:[
                     {
-                        icon: 'el-icon-menu',
-                        index: '3',
-                        title: '监测任务管理',
+                        icon: 'el-icon-date',
+                        index: '2',
+                        title: '系统管理',
                         subs: [
                             {
-                                index: '/monitor/manage',
-                                title: '任务列表'
+                                index: '/select/strategy',
+                                title: '选股策略列表'
                             },
                             {
-                                index: '/monitor/buysell',
-                                title: '买卖点统计'
+                                index: '/strategy/manage',
+                                title: '交易策略列表'
                             },
+                            {
+                                index: '/riskctrl/manage',
+                                title: '风控列表'
+                            },
+                            {
+                                index: '/order/gateway',
+                                title: '交易接口列表'
+                            },
+                            {
+                                index: '/market/gateway',
+                                title: '行情接口列表'
+                            }
                         ]
-                    },*/
+                    },
+                ],
+                items_common: [
                     {
                         icon: 'el-icon-service',
                         index: '4',
@@ -127,11 +143,6 @@
                                 index: '/backtest/manage',
                                 title: '任务列表'
                             },
-                            /*
-                            {
-                                index: '/start/backtest',
-                                title: '发起回测'
-                            },*/
                             {
                                 index: '/backtest/result',
                                 title: '回测结果'
@@ -160,15 +171,13 @@
             this.user_type = localStorage.getItem('user_type');  //管理员或用户
 
             if (this.user_type == 0){
-                return;
+                this.items = this.items_admin.concat(this.items_common);
+            }
+            else{
+                this.items = this.items_user.concat(this.items_common);
             }
 
-            //如果是普通用户，去掉系统管理的操作
-            for (var i = 0; i < this.items.length; i++) {
-                if (this.items[i].index == '2') {
-                    this.items.splice(i, 1);
-                }
-            }
+
         },
         computed:{
             onRoutes(){

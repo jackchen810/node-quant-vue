@@ -46,7 +46,7 @@
 
                 showDialogPwd: false,
                 form:{
-                    user_account:localStorage.getItem('ms_username'),
+                    user_account:localStorage.getItem('user_account'),
                     user_password:'',
                     user_new_password:'',
                     user_validate_password:''
@@ -76,7 +76,7 @@
         },
         computed:{
             username(){
-                let username = localStorage.getItem('ms_username');
+                let username = localStorage.getItem('user_account');
                 return username ? username : this.name;
             }
         },
@@ -90,12 +90,13 @@
             saveChange: function(formName){
                 var self = this;
                 var params = {
-                    user_account: self.form.user_account,
+                    //user_account: self.form.user_account,
                     //user_password:self.form.user_password,
-                    user_password: self.getmd5(self.ruleForm.password),
+                    user_account: localStorage.getItem('user_account'),
+                    user_password: self.getmd5(self.form.user_password),
                     user_new_password: self.form.user_new_password
                 };
-                self.$axios.post('api/admin/change',params).then(function(res){
+                self.$axios.post('/api/admin/change',params).then(function(res){
                     if(res.data.ret_code == 0){
                         self.showDialogPwd = false;
                         self.$message({message:res.data.ret_msg,type:'success'})
@@ -128,11 +129,11 @@
                     self.showDialogPwd = true;
                 }
                 if(command == 'loginout'){
-                    self.$axios.post('api/admin/logout').then(function(res){
+                    self.$axios.post('/api/admin/logout').then(function(res){
                         if(res.data.ret_code == 0){
                             self.$message(res.data.ret_msg);
-                            //localStorage.removeItem('ms_username');
-                            //localStorage.removeItem('userMsg');
+                            localStorage.removeItem('user_type');
+                            localStorage.removeItem('user_account');
                             self.$router.push('/login');
                         }else{
                             self.$message.error(res.data.ret_msg);

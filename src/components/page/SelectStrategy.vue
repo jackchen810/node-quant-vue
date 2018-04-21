@@ -7,12 +7,21 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group">
-            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">创建交易策略</el-button>
+            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">创建选股策略</el-button>
         </div>
         <el-table :data="strategy_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="file_name" label="策略名称" width="250"></el-table-column>
-            <el-table-column prop="alias_name" label="策略中文名称" width="400"></el-table-column>
-            <el-table-column prop="comment" label="备注" width="400"></el-table-column>
+            <el-table-column prop="comment" label="备注"></el-table-column>
+            <el-table-column prop="file_status" label="状态" width="100"></el-table-column>
+            <el-table-column prop="user_account" label="拥有用户" width="150"></el-table-column>
+            <el-table-column label="操作" v-if="isShow" width="160">
+                <template slot-scope="scope">
+                    <el-button class="btn1" type="text" size="small" @click="downloadRom(scope.row._id,scope.row.file_name,scope.row.file_status)">下载</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="delRom(scope.row._id,scope.row.file_name,scope.$index)">删除</el-button>
+                    <el-button class="btn1" type="danger" size="small" v-if="scope.row.file_status =='normal'" @click="revokeRom(scope.row._id,scope.row.file_name)">下架</el-button>
+                    <el-button class="btn1" type="success" size="small" v-else @click="releaseRom(scope.row._id,scope.row.file_name)">上架</el-button>
+                </template>
+            </el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
@@ -27,23 +36,24 @@
             <el-form :model="form" :rules="rules" ref="form">
                 <el-form-item label="上传" :label-width="formLabelWidth">
                     <el-upload
-                        class="upload-demo"
-                        ref="upload"
-                        name="file_name"
-                        action="http://127.0.0.1:8000/strategy/upload"
-                        :data="form"
-                        :beforeUpload="beforeUpload"
-                        :on-success="handleSuccess"
-                        :file-list="upload_filelist"
-                        :auto-upload="false">
-                        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                            class="upload-demo"
+                            drag
+                            ref="upload"
+                            name="file_name"
+                            :action="uploadUrl"
+                            :with-credentials="true"
+                            :data="form"
+                            :beforeUpload="beforeUpload"
+                            :on-success="handleSuccess"
+                            :file-list="fileList3"
+                            :auto-upload="false">
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                        <div class="el-upload__tip" slot="tip">只支持上传js文件</div>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="策略名称" prop=alias_name :label-width="formLabelWidth">
-                    <el-input v-model="form.alias_name" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
                 <el-form-item label="备注说明" prop="comment" :label-width="formLabelWidth">
-                    <el-input v-model="form.comment" class="diainp" auto-complete="off"></el-input>
+                    <el-input v-model="form.comment" class="diainp" auto-complete="off" placeholder="备注说明"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -55,19 +65,22 @@
 </template>
 
 <script>
-    //import global_ from 'components/common/Global';
+    import global_ from 'components/common/Global';
     export default {
         data: function(){
             return {
                 user_type:1,  //0:管理员, 1:用户
+                isShow:false,
+                uploadUrl:'api/pick/stock/strategy/upload',
+                fileList3: [],
                 form: {
                     file_name:'',
-                    alias_name:'',
+                    user_account:localStorage.getItem('user_account'),
                     comment:''
                 },
                 rules: {
-                    alias_name:[
-                        {required: true, message: '请输入ROM版本号', trigger: 'blur'}
+                    file_name:[
+                        {required: true, message: '请输入文件', trigger: 'blur'}
                     ]
                 },
                 formLabelWidth: '120px',
@@ -78,41 +91,48 @@
                 strategy_list:[],
                 strategy_file_list:[],
 
-                pageTotal:0,
-                currentPage:1
+                pageTotal:1,
+                currentPage:1,
+                page_size:10
             }
         },
         created: function(){
-            this.getStrategyList();
+            this.getStrategyList(1, this.page_size);
             this.user_type = localStorage.getItem('user_type');  //管理员或用户
+            this.isShow = this.user_type =='1'?false:true;
         },
         methods: {
-            getStrategyList: function(){//获取rom列表
+            getStrategyList: function(current_page, page_size, filter){//获取rom列表
                 var self = this;
+                var params = {
+                    filter: filter,
+                    page_size: page_size,
+                    current_page: current_page,
+                };
                 self.loading = true;
                 self.$axios.post('/api/pick/stock/strategy/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra.length;
-                        self.strategy_file_list = res.data.extra.slice(0,10);
-                        for(var i=0;i<self.strategy_file_list.length;i++){
-                            var obj = {
-                                'file_name':self.strategy_file_list[i],
-                                'alias_name':self.strategy_file_list[i],
-                                'comment': '',
+                        self.strategy_list = res.data.extra.slice(0, self.page_size);
+                        self.pageTotal = res.data.extra.total;
                             }
-                            self.strategy_list.push(obj);
-                        }
-                    }
                     else{
-                        self.strategy_file_list = [];
+                        self.strategy_list = [];
                         console.log('resp:', res.data);
                     }
                 });
             },
             saveAdd: function(formName){
                 var self = this;
-
+                self.$refs[formName].validate(function(valid){
+                    if(valid){
+                        self.fullscreenLoading  = true;
+                        self.$refs.upload.submit();
+                    }else{
+                        return false;
+                        console.log('验证失败');
+                    }
+                });
             },
             beforeUpload: function(file){
                 console.log(file);
@@ -122,15 +142,118 @@
             handleSuccess: function(response,file,fileList){
                 console.log(response);
                 this.fullscreenLoading  = false;
-                this.$message('创建成功');
-                this.dialogFormVisible = false;
-                this.getStrategyList();
+                if(response.ret_code == 0){
+                    this.$message('上传成功');
+                    this.dialogFormVisible = false;
+                    this.getStrategyList(1, this.page_size);
+                }
+                else{
+                    this.$message(response.ret_msg);
+                }
+                this.fileList3 = [];
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
-                this.getStrategyList();
+                this.getStrategyList(1, this.page_size);
             },
 
+            downloadRom: function(id,fileName,status){//下载
+                var self = this;
+                if(status == 'revoke'){
+                    self.$message({message:'固件已下架',type:'warning'});
+                    return false;
+                }
+                var params = {
+                    _id: id,
+                    file_name:fileName
+                };
+                self.loading = true;
+                self.$axios.post('api/pick/stock/strategy/download',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        const aLink = document.createElement('a');
+                        const evt = document.createEvent('MouseEvents');
+                        // var evt = document.createEvent("HTMLEvents")
+                        evt.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+                        aLink.download = fileName;
+                        aLink.href = global_.baseUrl + res.data.extra.access_path;
+                        console.log(aLink.href);
+                        //aLink.href = 'http://127.0.0.1:8000/back%20002.jpg';
+                        aLink.dispatchEvent(evt)
+
+                    }else{
+                        self.$message.error(res.data.extra);
+                    }
+                },function(err){
+                    self.$message.error('下载失败');
+                    self.loading = false;
+                    console.log(err);
+                });
+            },
+            delRom: function(id,fileName,i){//删除
+                var self = this;
+                var params = {
+                    _id: id,
+                    file_name:fileName
+                };
+                self.loading = true;
+                self.$axios.post('/api/pick/stock/strategy/del',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'删除成功',type:'success'});
+                        self.getStrategyList(1, self.page_size);
+                    }else{
+                        self.$message.error(res.data.extra)
+                    }
+
+                },function(err){
+                    self.$message.error('删除失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+            },
+            releaseRom: function(id,fileName){//上架操作
+                var self = this;
+                var params = {
+                    _id: id,
+                    file_name:fileName
+                };
+                self.loading = true;
+                self.$axios.post('/api/pick/stock/strategy/release',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'操作成功',type:'success'});
+                        self.getStrategyList(1, self.page_size);
+                    }else{
+                        self.$message.error(res.data.extra)
+                    }
+
+                },function(err){
+                    self.$message.error('操作失败');
+                    self.loading = false;
+                })
+            },
+            revokeRom: function(id,fileName){//下架操作
+                var self = this;
+                var params = {
+                    _id: id,
+                    file_name:fileName
+                };
+                self.loading = true;
+                self.$axios.post('/api/pick/stock/strategy/revoke',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'操作成功',type:'success'});
+                        self.getStrategyList(1, self.page_size);
+                    }else{
+                        self.$message.error(res.data.extra)
+                    }
+
+                },function(err){
+                    self.$message.error('操作失败');
+                    self.loading = false;
+                })
+            },
         },
         computed:{
 

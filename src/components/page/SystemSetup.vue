@@ -6,7 +6,7 @@
                 <el-breadcrumb-item>系统设置</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class='rad-group mb40' v-if="user_type =='0'?true:false">
+        <div class='rad-group mb40' v-if="isShow">
             <el-tabs v-model="tabs_item" type="card" @tab-click="handleClick">
                 <el-tab-pane label="交易接口设置" name="1">
                     <div class="form-box tab-cont form-box2">
@@ -47,45 +47,6 @@
                         </el-form>
                     </div>
                 </el-tab-pane>
-                <el-tab-pane label="密码修改" name="2">
-                    <div class="form-box tab-cont form-box2">
-                        <el-form :model="form_trade" :rules="rule_trade" ref="form_trade" label-width="150px">
-                            <el-form-item label="风控名称" prop="riskctrl_name" :label-width="formLabelWidth">
-                                <el-select v-model="form_trade.riskctrl_name" placeholder="请选择对应风控">
-                                    <el-option
-                                            v-for="item in riskctrl_file_list"
-                                            :key="item"
-                                            :label="item"
-                                            :value="item">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item label="行情接口" prop="market_gateway" :label-width="formLabelWidth">
-                                <el-select v-model="form_trade.market_gateway" placeholder="请选择对应行情接口">
-                                    <el-option
-                                            v-for="item in market_gateway_file_list"
-                                            :key="item"
-                                            :label="item"
-                                            :value="item">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item label="交易接口" prop="order_gateway" :label-width="formLabelWidth">
-                                <el-select v-model="form_trade.order_gateway" placeholder="请选择对应交易接口">
-                                    <el-option
-                                            v-for="item in order_gateway_file_list"
-                                            :key="item"
-                                            :label="item"
-                                            :value="item">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item>
-                                <el-button type="primary" @click="setupSubmit('form_trade')" v-loading.fullscreen.lock="fullscreenLoading">确定</el-button>
-                            </el-form-item>
-                        </el-form>
-                    </div>
-                </el-tab-pane>
             </el-tabs>
 
         </div>
@@ -100,6 +61,7 @@
         data: function () {
             return {
                 user_type:1,  //0:管理员, 1:用户
+                isShow:false,
                 formLabelWidth: '100px',
                 formLabelWidth50: '50px',
                 form_trade: {
@@ -141,6 +103,7 @@
             this.getOrderGatewayList();
             this.getMarketGatewayList();
             this.user_type = localStorage.getItem('user_type');  //管理员或用户
+            this.isShow = this.user_type =='1'?false:true;
         },
         methods: {
 

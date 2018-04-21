@@ -6,7 +6,7 @@ import ElementUI from 'element-ui';
 //import 'element-ui/lib/theme-default/index.css';    // 默认主题
 import 'element-ui/lib/theme-chalk/index.css'
  //import '../static/css/theme-green/index.css';       // 浅绿色主题
-import "babel-polyfill";
+//import "babel-polyfill";
 //const VueCookie = require('vue-cookie');
 
 //var echarts = import('echarts');

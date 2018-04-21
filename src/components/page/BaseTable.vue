@@ -11,10 +11,10 @@
                 <el-input v-model="search_word" placeholder="请输入账号查找" class="handle-input mr10"></el-input>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" icon="search" :disabled="user_type=='0'?false:true" @click="search">查询</el-button>
+                <el-button type="primary" icon="search" @click="search">查询</el-button>
             </el-form-item>
         </el-form>
-        <div class='rad-group' v-if="user_type =='0'?true:false">
+        <div class='rad-group'>
             <el-radio-group v-model="radio3" @change="changeTab">
                 <el-radio-button label="all">全部</el-radio-button>
                 <el-radio-button label="0">未冻结</el-radio-button>
@@ -38,11 +38,11 @@
                 </template>
             </el-table-column>
             <el-table-column prop="user_create_time" label="创建时间" width="150"></el-table-column>
-            <el-table-column label="操作" width="380">
-                <template slot-scope="scope">
+            <el-table-column label="操作" width="180">
+                <template slot-scope="scope" v-if="isShow && scope.row.user_type =='1'">
                     <!--<el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>-->
-                    <el-button class="btn1" size="small" v-if="scope.row.user_status =='0' && scope.row.user_type =='1'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
-                    <el-button class="btn1" size="small" v-else-if="scope.row.user_status =='1' && scope.row.user_type =='1'" @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
+                    <el-button class="btn1" size="small" v-if="scope.row.user_status =='0'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
+                    <el-button class="btn1" size="small" v-else-if="scope.row.user_status =='1'" @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -59,12 +59,13 @@
 
 <script>
     import global_ from 'components/common/Global';
-    var crypto = require('crypto');
+    //var crypto = require('crypto');
     export default {
         data: function() {
             return {
                 radio3:'all',
                 user_type:1,  //0:管理员, 1:用户
+                isShow:false,
                 loading2:false,
                 dialogFormVisible: false,
                 form: {
@@ -113,7 +114,7 @@
                 loading:false,
                 emptyMsg:'暂无数据',
                 formP:{
-                    user_account:localStorage.getItem('ms_username'),
+                    user_account:localStorage.getItem('user_account'),
                     user_password:'',
                     user_new_password:'',
                     user_validate_password:''
@@ -143,6 +144,7 @@
         created: function(){
             this.getUsers(1, this.page_size);
             this.user_type = localStorage.getItem('user_type');  //管理员或用户
+            this.isShow = this.user_type =='1'?false:true;
             //console.log('this.user_type', this.user_type);
             //console.log('this.user_account', localStorage.getItem('user_account'));
             //console.log('cookie', this.$cookie.get('user_type'));
