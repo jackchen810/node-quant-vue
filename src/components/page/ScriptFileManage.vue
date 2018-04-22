@@ -2,15 +2,15 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-star-on"></i> 交易接口管理</el-breadcrumb-item>
-                <el-breadcrumb-item>交易接口列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-star-on"></i> {{this.breadcrumbs1}}</el-breadcrumb-item>
+                <el-breadcrumb-item>{{this.breadcrumbs2}}</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box rad-group" v-if="isShow">
-            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">创建交易接口</el-button>
+        <div class="handle-box rad-group">
+            <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">{{this.button_add}}</el-button>
         </div>
-        <el-table :data="order_gateway_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column prop="file_name" label="交易接口名称" width="250"></el-table-column>
+        <el-table :data="script_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
+            <el-table-column prop="file_name" label="策略名称" width="250"></el-table-column>
             <el-table-column prop="comment" label="备注"></el-table-column>
             <el-table-column prop="file_status" label="状态" width="100"></el-table-column>
             <el-table-column prop="user_account" label="拥有用户" width="150"></el-table-column>
@@ -31,8 +31,9 @@
                 :total="pageTotal">
             </el-pagination>
         </div>
-        <el-dialog title="添加交易接口" :visible.sync="dialogFormVisible" class="digcont">
-            <el-form :model="form" :rules="rules" ref="form">
+
+        <el-dialog title="添加交易策略" :visible.sync="dialogFormVisible" class="digcont">
+            <el-form :model="upload_form" :rules="upload_form" ref="upload_form">
                 <el-form-item label="上传" :label-width="formLabelWidth">
                     <el-upload
                             class="upload-demo"
@@ -41,7 +42,7 @@
                             name="file_name"
                             :action="uploadUrl"
                             :with-credentials="true"
-                            :data="form"
+                            :data="upload_form"
                             :beforeUpload="beforeUpload"
                             :on-success="handleSuccess"
                             :file-list="upload_file_list"
@@ -52,12 +53,12 @@
                     </el-upload>
                 </el-form-item>
                 <el-form-item label="备注说明" prop="comment" :label-width="formLabelWidth">
-                    <el-input v-model="form.comment" class="diainp" auto-complete="off" placeholder="备注说明"></el-input>
+                    <el-input v-model="upload_form.comment" class="diainp" auto-complete="off" placeholder="备注说明"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveAdd('form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
+                <el-button type="primary" @click="saveAdd('upload_form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
             </div>
         </el-dialog>
     </div>
@@ -68,16 +69,21 @@
     export default {
         data: function(){
             return {
+                breadcrumbs1:'管理',
+                breadcrumbs2:'列表',
+                button_add:'添加',
+                route_path:'',
                 user_type:1,  //0:管理员, 1:用户
                 isShow:false,
-                uploadUrl:'api/pick/stock/strategy/upload',
+                uploadUrl:'api/script/upload',
                 upload_file_list: [],
-                form: {
+                upload_form: {
                     file_name:'',
+                    file_type:'',
                     user_account:localStorage.getItem('user_account'),
                     comment:''
                 },
-                rules: {
+                upload_rules: {
                     file_name:[
                         {required: true, message: '请输入文件', trigger: 'blur'}
                     ]
@@ -87,8 +93,8 @@
                 dialogFormVisible:false,
                 fullscreenLoading: false,
                 upload_filelist: [],
-                order_gateway_list:[],
-                order_gateway_file_list:[],
+                script_list:[],
+                strategy_file_list:[],
 
                 pageTotal:1,
                 currentPage:1,
@@ -96,12 +102,85 @@
             }
         },
         created: function(){
-            this.getOrderGatewayList(1, this.page_size);
+            this.route_path = this.$route.path;
+            console.log('route path:', this.route_path);
+            //this.getScriptList(1, this.page_size);
             this.user_type = localStorage.getItem('user_type');  //管理员或用户
             this.isShow = this.user_type =='1'?false:true;
+
+            if (this.route_path == '/select/strategy') {
+                this.breadcrumbs1 = '策略管理';
+                this.breadcrumbs2 = '策略列表';
+                this.button_add = '添加选股策略';
+                this.upload_form.file_type = 'select';
+                //this.getScriptListByType(1, this.page_size, {file_type:'select'});
+
+            }else if (this.route_path == '/strategy/manage') {
+                this.breadcrumbs1 = '策略管理';
+                this.breadcrumbs2 = '策略列表';
+                this.button_add = '添加交易策略';
+                this.upload_form.file_type = 'trade';
+                //this.getScriptListByType(1, this.page_size, {file_type:'trade'});
+
+            }else if (this.route_path == '/riskctrl/manage') {
+                this.breadcrumbs1 = '风控管理';
+                this.breadcrumbs2 = '风控列表';
+                this.button_add = '添加风控策略';
+                this.upload_form.file_type = 'riskctrl';
+                //this.getScriptListByType(1, this.page_size, {file_type:'riskctrl'});
+            }else if (this.route_path == '/order/gateway') {
+                this.breadcrumbs1 = '行情管理';
+                this.breadcrumbs2 = '行情列表';
+                this.button_add = '添加行情接口';
+                this.upload_form.file_type = 'order';
+                //this.getScriptListByType(1, this.page_size, {file_type:'order'});
+            }else if (this.route_path == '/market/gateway') {
+                this.breadcrumbs1 = '市场管理';
+                this.breadcrumbs2 = '市场列表';
+                this.button_add = '添加市场接口';
+                this.upload_form.file_type = 'market';
+                //this.getScriptListByType(1, this.page_size, {file_type:'market'});
+            }
+
+            this.getScriptListByType(1, this.page_size);
         },
         methods: {
-            getOrderGatewayList: function(current_page, page_size, filter){//获取设备类型
+            getScriptListByType: function(current_page, page_size, filter){//获取rom列表
+                if (this.route_path == '/select/strategy') {
+                    if (!filter){
+                        var filter = {};
+                        console.log('filter');
+                    }
+                    filter['file_type'] = 'select';
+                    console.log('filter', filter);
+                    this.getScriptList(1, this.page_size, filter);
+                }else if (this.route_path == '/strategy/manage') {
+                    if (!filter){
+                        var filter = {};
+                    }
+                    filter['file_type'] = 'trade';
+                    this.getScriptList(1, this.page_size, filter);
+                }else if (this.route_path == '/riskctrl/manage') {
+                    if (!filter){
+                        var filter = {};
+                    }
+                    filter['file_type'] = 'riskctrl';
+                    this.getScriptList(1, this.page_size, filter);
+                }else if (this.route_path == '/order/gateway') {
+                    if (!filter){
+                        var filter = {};
+                    }
+                    filter['file_type'] = 'order';
+                    this.getScriptList(1, this.page_size, filter);
+                }else if (this.route_path == '/market/gateway') {
+                    if (!filter){
+                        var filter = {};
+                    }
+                    filter['file_type'] = 'market';
+                    this.getScriptList(1, this.page_size, filter);
+                }
+            },
+            getScriptList: function(current_page, page_size, filter){//获取rom列表
                 var self = this;
                 var params = {
                     filter: filter,
@@ -109,14 +188,14 @@
                     current_page: current_page,
                 };
                 self.loading = true;
-                self.$axios.post('/api/order/list').then(function(res){
+                self.$axios.post('/api/script/list').then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.strategy_list = res.data.extra.slice(0, self.page_size);
+                        self.script_list = res.data.extra.slice(0, self.page_size);
                         self.pageTotal = res.data.extra.total;
-                            }
+                    }
                     else{
-                        self.order_gateway_file_list = [];
+                        self.script_list = [];
                         console.log('resp:', res.data);
                     }
                 });
@@ -135,7 +214,7 @@
             },
             beforeUpload: function(file){
                 console.log(file);
-                this.form.file_name = file.name;
+                this.upload_form.file_name = file.name;
                 return true;
             },
             handleSuccess: function(response,file,fileList){
@@ -144,7 +223,7 @@
                 if(response.ret_code == 0){
                     this.$message('上传成功');
                     this.dialogFormVisible = false;
-                    this.getStrategyList(1, this.page_size);
+                    this.getScriptListByType(1, this.page_size);
                 }
                 else{
                     this.$message(response.ret_msg);
@@ -153,13 +232,13 @@
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
-                this.getStrategyList(1, this.page_size);
+                this.getScriptListByType(1, this.page_size);
             },
 
             downloadRom: function(id,fileName,status){//下载
                 var self = this;
                 if(status == 'revoke'){
-                    self.$message({message:'固件已下架',type:'warning'});
+                    self.$message({message:'脚本已下架',type:'warning'});
                     return false;
                 }
                 var params = {
@@ -167,7 +246,7 @@
                     file_name:fileName
                 };
                 self.loading = true;
-                self.$axios.post('api/pick/stock/strategy/download',params).then(function(res){
+                self.$axios.post('api/script/download',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         const aLink = document.createElement('a');
@@ -196,11 +275,11 @@
                     file_name:fileName
                 };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/strategy/del',params).then(function(res){
+                self.$axios.post('/api/script/del',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message({message:'删除成功',type:'success'});
-                        self.getStrategyList(1, self.page_size);
+                        self.getScriptListByType(1, self.page_size);
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -218,11 +297,11 @@
                     file_name:fileName
                 };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/strategy/release',params).then(function(res){
+                self.$axios.post('/api/script/release',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
-                        self.getStrategyList(1, self.page_size);
+                        self.getScriptListByType(1, self.page_size);
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -239,11 +318,11 @@
                     file_name:fileName
                 };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/strategy/revoke',params).then(function(res){
+                self.$axios.post('/api/script/revoke',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
-                        self.getStrategyList(1, self.page_size);
+                        self.getScriptListByType(1, self.page_size);
                     }else{
                         self.$message.error(res.data.extra)
                     }

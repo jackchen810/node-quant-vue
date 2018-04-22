@@ -149,7 +149,7 @@
     .handle-input{  width: 300px;  display: inline-block;  }
     .handle-box2{display:inline-block;float:right;}
     /*.el-table_1_column_5{color:#eb9e05;}*/
-    .orange{color:#eb9e05;background-color:none;}
+    .orange{color:#eb9e05;background-color:inherit;}
     .btn2{margin-bottom:5px;margin-left:0;}
     .diainp{width:217px;}
     .diainp2{width:400px;}

@@ -30,23 +30,23 @@ export default new Router({
                 },
                 {
                     path: '/select/strategy',
-                    component: resolve => require(['../components/page/SelectStrategy.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/ScriptFileManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
                     path: '/strategy/manage',
-                    component: resolve => require(['../components/page/StrategyManage.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/ScriptFileManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
                     path: '/riskctrl/manage',
-                    component: resolve => require(['../components/page/RiskctrlManage.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/ScriptFileManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
                     path: '/order/gateway',
-                    component: resolve => require(['../components/page/OrderGatewayManage.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/ScriptFileManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
                     path: '/market/gateway',
-                    component: resolve => require(['../components/page/MarketGatewayManage.vue'], resolve)     // vue-datasource组件
+                    component: resolve => require(['../components/page/ScriptFileManage.vue'], resolve)     // vue-datasource组件
                 },
                 /////交易系统管理
                 {

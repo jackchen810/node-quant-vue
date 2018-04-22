@@ -45,7 +45,7 @@
                             :data="form"
                             :beforeUpload="beforeUpload"
                             :on-success="handleSuccess"
-                            :file-list="fileList3"
+                            :file-list="upload_file_list"
                             :auto-upload="false">
                         <i class="el-icon-upload"></i>
                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -72,7 +72,7 @@
                 user_type:1,  //0:管理员, 1:用户
                 isShow:false,
                 uploadUrl:'api/pick/stock/strategy/upload',
-                fileList3: [],
+                upload_file_list: [],
                 form: {
                     file_name:'',
                     user_account:localStorage.getItem('user_account'),
@@ -150,7 +150,7 @@
                 else{
                     this.$message(response.ret_msg);
                 }
-                this.fileList3 = [];
+                this.upload_file_list = [];
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
@@ -267,7 +267,7 @@
     .handle-input{  width: 300px;  display: inline-block;  }
     .handle-box2{display:inline-block;float:right;}
     /*.el-table_1_column_5{color:#eb9e05;}*/
-    .orange{color:#eb9e05;background-color:none;}
+    .orange{color:#eb9e05;background-color:inherit;}
     .btn2{margin-bottom:5px;margin-left:0;}
     .diainp{width:217px;}
     .diainp2{width:400px;}
