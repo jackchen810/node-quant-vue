@@ -47,6 +47,15 @@
                         </el-form>
                     </div>
                 </el-tab-pane>
+                <el-tab-pane label="同步文件到数据库" name="2">
+                    <div class="form-box tab-cont form-box2">
+                        <el-form :model="form_trade" :rules="rule_trade" label-width="150px">
+                            <el-form-item>
+                                <el-button type="primary" @click="syncSubmit" v-loading.fullscreen.lock="fullscreenLoading">同步</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-tab-pane>
             </el-tabs>
 
         </div>
@@ -98,12 +107,12 @@
             }
         },
         created:function () {
+            this.user_type = localStorage.getItem('user_type');  //管理员或用户
+            this.isShow = this.user_type =='1'?false:true;
             this.getSystemSetupList();
             this.getRiskCtrlList();
             this.getOrderGatewayList();
             this.getMarketGatewayList();
-            this.user_type = localStorage.getItem('user_type');  //管理员或用户
-            this.isShow = this.user_type =='1'?false:true;
         },
         methods: {
 
@@ -138,11 +147,27 @@
                     }
                 });
             },
-
-            getRiskCtrlList: function(){//获取设备类型
+            syncSubmit:function () {
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/riskctrl/list').then(function(res){
+                self.$axios.post('/api/script/sync').then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'同步成功',type:'success'});
+                    }
+                    else{
+                        console.log('resp:', res.data)
+                    }
+                })
+            },
+            getRiskCtrlList: function(){//获取设备类型
+                var self = this;
+                var filter = {file_type: 'riskctrl'};
+                if (this.user_type == '1'){
+                    filter['user_account'] = localStorage.getItem('user_account');
+                }
+                self.loading = true;
+                self.$axios.post('/api/riskctrl/list', {filter: filter}).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.riskctrl_file_list = res.data.extra;
@@ -154,8 +179,12 @@
             },
             getOrderGatewayList: function(){//获取设备类型
                 var self = this;
+                var filter = {file_type: 'order'};
+                if (this.user_type == '1'){
+                    filter['user_account'] = localStorage.getItem('user_account');
+                }
                 self.loading = true;
-                self.$axios.post('/api/order/list').then(function(res){
+                self.$axios.post('/api/order/list', {filter: filter}).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.order_gateway_file_list = res.data.extra;
@@ -167,8 +196,12 @@
             },
             getMarketGatewayList: function(){//获取设备类型
                 var self = this;
+                var filter = {file_type: 'market'};
+                if (this.user_type == '1'){
+                    filter['user_account'] = localStorage.getItem('user_account');
+                }
                 self.loading = true;
-                self.$axios.post('/api/market/list').then(function(res){
+                self.$axios.post('/api/market/list', {filter: filter}).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.market_gateway_file_list = res.data.extra;

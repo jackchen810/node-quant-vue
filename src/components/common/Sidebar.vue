@@ -181,6 +181,7 @@
         },
         computed:{
             onRoutes(){
+                //console.log('onRoutes path:', this.$route.path.replace('/',''));
                 return this.$route.path.replace('/','');
             }
         },

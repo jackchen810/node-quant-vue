@@ -6,14 +6,14 @@
                 <el-breadcrumb-item>{{this.breadcrumbs2}}</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box rad-group">
+        <div class="handle-box rad-group" v-if="isShow">
             <el-button type="primary" icon="el-icon-plus" class="handle-del mr10" @click="dialogFormVisible=true">{{this.button_add}}</el-button>
         </div>
         <el-table :data="script_list" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column prop="file_name" label="策略名称" width="250"></el-table-column>
+            <el-table-column prop="file_name" label="脚本名称" width="250"></el-table-column>
             <el-table-column prop="comment" label="备注"></el-table-column>
             <el-table-column prop="file_status" label="状态" width="100"></el-table-column>
-            <el-table-column prop="user_account" label="拥有用户" width="150"></el-table-column>
+            <el-table-column prop="user_account" label="拥有者" width="150"></el-table-column>
             <el-table-column label="操作" v-if="isShow" width="160">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="downloadRom(scope.row._id,scope.row.file_name,scope.row.file_status)">下载</el-button>
@@ -102,83 +102,58 @@
             }
         },
         created: function(){
-            this.route_path = this.$route.path;
-            console.log('route path:', this.route_path);
-            //this.getScriptList(1, this.page_size);
+            console.log('created path:');
             this.user_type = localStorage.getItem('user_type');  //管理员或用户
-            this.isShow = this.user_type =='1'?false:true;
-
-            if (this.route_path == '/select/strategy') {
-                this.breadcrumbs1 = '策略管理';
-                this.breadcrumbs2 = '策略列表';
-                this.button_add = '添加选股策略';
-                this.upload_form.file_type = 'select';
-                //this.getScriptListByType(1, this.page_size, {file_type:'select'});
-
-            }else if (this.route_path == '/strategy/manage') {
-                this.breadcrumbs1 = '策略管理';
-                this.breadcrumbs2 = '策略列表';
-                this.button_add = '添加交易策略';
-                this.upload_form.file_type = 'trade';
-                //this.getScriptListByType(1, this.page_size, {file_type:'trade'});
-
-            }else if (this.route_path == '/riskctrl/manage') {
-                this.breadcrumbs1 = '风控管理';
-                this.breadcrumbs2 = '风控列表';
-                this.button_add = '添加风控策略';
-                this.upload_form.file_type = 'riskctrl';
-                //this.getScriptListByType(1, this.page_size, {file_type:'riskctrl'});
-            }else if (this.route_path == '/order/gateway') {
-                this.breadcrumbs1 = '行情管理';
-                this.breadcrumbs2 = '行情列表';
-                this.button_add = '添加行情接口';
-                this.upload_form.file_type = 'order';
-                //this.getScriptListByType(1, this.page_size, {file_type:'order'});
-            }else if (this.route_path == '/market/gateway') {
-                this.breadcrumbs1 = '市场管理';
-                this.breadcrumbs2 = '市场列表';
-                this.button_add = '添加市场接口';
-                this.upload_form.file_type = 'market';
-                //this.getScriptListByType(1, this.page_size, {file_type:'market'});
+            this.route_path = this.$route.path;
+            this.updateData();
+        },
+        watch: {
+            '$route': function (to , from) {
+                console.log('watch route path:',this.$route.path);
+                this.route_path = this.$route.path;
+                this.updateData();
             }
-
-            this.getScriptListByType(1, this.page_size);
         },
         methods: {
-            getScriptListByType: function(current_page, page_size, filter){//获取rom列表
+            updateData: function() {//获取rom列表
+                this.isShow = this.user_type =='1'?false:true;
+
                 if (this.route_path == '/select/strategy') {
-                    if (!filter){
-                        var filter = {};
-                        console.log('filter');
-                    }
-                    filter['file_type'] = 'select';
-                    console.log('filter', filter);
-                    this.getScriptList(1, this.page_size, filter);
+                    this.isShow = true;
+                    this.breadcrumbs1 = '选股策略管理';
+                    this.breadcrumbs2 = '选股策略列表';
+                    this.button_add = '添加选股策略';
+                    this.upload_form.file_type = 'select';
+
                 }else if (this.route_path == '/strategy/manage') {
-                    if (!filter){
-                        var filter = {};
-                    }
-                    filter['file_type'] = 'trade';
-                    this.getScriptList(1, this.page_size, filter);
+                    this.isShow = true;
+                    this.breadcrumbs1 = '交易策略管理';
+                    this.breadcrumbs2 = '交易策略列表';
+                    this.button_add = '添加交易策略';
+                    this.upload_form.file_type = 'trade';
+
                 }else if (this.route_path == '/riskctrl/manage') {
-                    if (!filter){
-                        var filter = {};
-                    }
-                    filter['file_type'] = 'riskctrl';
-                    this.getScriptList(1, this.page_size, filter);
-                }else if (this.route_path == '/order/gateway') {
-                    if (!filter){
-                        var filter = {};
-                    }
-                    filter['file_type'] = 'order';
-                    this.getScriptList(1, this.page_size, filter);
+                    this.breadcrumbs1 = '风控管理';
+                    this.breadcrumbs2 = '风控列表';
+                    this.button_add = '添加风控策略';
+                    this.upload_form.file_type = 'riskctrl';
                 }else if (this.route_path == '/market/gateway') {
-                    if (!filter){
-                        var filter = {};
-                    }
-                    filter['file_type'] = 'market';
-                    this.getScriptList(1, this.page_size, filter);
+                    this.breadcrumbs1 = '行情接口管理';
+                    this.breadcrumbs2 = '行情接口列表';
+                    this.button_add = '添加行情接口';
+                    this.upload_form.file_type = 'market';
+                }else if (this.route_path == '/order/gateway') {
+                    this.breadcrumbs1 = '交易接口管理';
+                    this.breadcrumbs2 = '交易接口列表';
+                    this.button_add = '添加交易接口';
+                    this.upload_form.file_type = 'order';
                 }
+
+                var filter = {
+                    'file_type': this.upload_form.file_type,
+                    'user_account': this.upload_form.user_account
+                };
+                this.getScriptList(1, this.page_size, filter);
             },
             getScriptList: function(current_page, page_size, filter){//获取rom列表
                 var self = this;
@@ -188,7 +163,7 @@
                     current_page: current_page,
                 };
                 self.loading = true;
-                self.$axios.post('/api/script/list').then(function(res){
+                self.$axios.post('/api/script/list', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.script_list = res.data.extra.slice(0, self.page_size);
@@ -217,13 +192,13 @@
                 this.upload_form.file_name = file.name;
                 return true;
             },
-            handleSuccess: function(response,file,fileList){
+            handleSuccess: function(response, file, fileList){
                 console.log(response);
                 this.fullscreenLoading  = false;
                 if(response.ret_code == 0){
                     this.$message('上传成功');
                     this.dialogFormVisible = false;
-                    this.getScriptListByType(1, this.page_size);
+                    this.getScriptList(1, this.page_size, {'file_type': this.upload_form.file_type});
                 }
                 else{
                     this.$message(response.ret_msg);
@@ -232,7 +207,7 @@
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
-                this.getScriptListByType(1, this.page_size);
+                this.getScriptList(1, this.page_size, {'file_type': this.upload_form.file_type});
             },
 
             downloadRom: function(id,fileName,status){//下载
@@ -279,7 +254,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message({message:'删除成功',type:'success'});
-                        self.getScriptListByType(1, self.page_size);
+                        self.getScriptList(1, self.page_size, {'file_type': self.upload_form.file_type});
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -301,7 +276,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
-                        self.getScriptListByType(1, self.page_size);
+                        self.getScriptList(1, self.page_size, {'file_type': self.upload_form.file_type});
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -322,7 +297,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
-                        self.getScriptListByType(1, self.page_size);
+                        self.getScriptList(1, self.page_size, {'file_type': self.upload_form.file_type});
                     }else{
                         self.$message.error(res.data.extra)
                     }
