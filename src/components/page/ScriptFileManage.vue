@@ -13,13 +13,13 @@
             <el-table-column prop="file_name" label="脚本名称" width="250"></el-table-column>
             <el-table-column prop="comment" label="备注"></el-table-column>
             <el-table-column prop="file_status" label="状态" width="100"></el-table-column>
-            <el-table-column prop="user_account" label="拥有者" width="150"></el-table-column>
+            <el-table-column prop="user_account" label="管理账户" width="150"></el-table-column>
             <el-table-column label="操作" v-if="isShow" width="160">
                 <template slot-scope="scope">
-                    <el-button class="btn1" type="text" size="small" @click="downloadRom(scope.row._id,scope.row.file_name,scope.row.file_status)">下载</el-button>
-                    <el-button class="btn1" type="text" size="small" @click="delRom(scope.row._id,scope.row.file_name,scope.$index)">删除</el-button>
-                    <el-button class="btn1" type="danger" size="small" v-if="scope.row.file_status =='normal'" @click="revokeRom(scope.row._id,scope.row.file_name)">下架</el-button>
-                    <el-button class="btn1" type="success" size="small" v-else @click="releaseRom(scope.row._id,scope.row.file_name)">上架</el-button>
+                    <el-button class="btn1" type="text" size="small" v-if="isShow" @click="downloadRom(scope.$index)">下载</el-button>
+                    <el-button class="btn1" type="text" size="small" v-if="isShow" @click="delRom(scope.$index)">删除</el-button>
+                    <el-button class="btn1" type="danger" size="small" v-if="scope.row.file_status =='normal'" @click="revokeRom(scope.$index)">下架</el-button>
+                    <el-button class="btn1" type="success" size="small" v-else @click="releaseRom(scope.$index)">上架</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -76,7 +76,6 @@
                 user_type:1,  //0:管理员, 1:用户
                 isShow:false,
                 uploadUrl:'api/script/upload',
-                upload_file_list: [],
                 upload_form: {
                     file_name:'',
                     file_type:'',
@@ -92,9 +91,9 @@
                 loading:false,
                 dialogFormVisible:false,
                 fullscreenLoading: false,
-                upload_filelist: [],
+                upload_file_list: [],
                 script_list:[],
-                strategy_file_list:[],
+                filter:'',
 
                 pageTotal:1,
                 currentPage:1,
@@ -118,12 +117,20 @@
             updateData: function() {//获取rom列表
                 this.isShow = this.user_type =='1'?false:true;
 
+
                 if (this.route_path == '/select/strategy') {
                     this.isShow = true;
                     this.breadcrumbs1 = '选股策略管理';
                     this.breadcrumbs2 = '选股策略列表';
                     this.button_add = '添加选股策略';
                     this.upload_form.file_type = 'select';
+                    if (this.user_type == '1'){
+                        this.filter = {file_type: this.upload_form.file_type};
+                        this.filter['user_account'] = localStorage.getItem('user_account');
+                    }
+                    else{
+                        this.filter = {file_type: this.upload_form.file_type};
+                    }
 
                 }else if (this.route_path == '/strategy/manage') {
                     this.isShow = true;
@@ -131,29 +138,36 @@
                     this.breadcrumbs2 = '交易策略列表';
                     this.button_add = '添加交易策略';
                     this.upload_form.file_type = 'trade';
+                    if (this.user_type == '1'){
+                        this.filter = {file_type: this.upload_form.file_type};
+                        this.filter['user_account'] = localStorage.getItem('user_account');
+                    }
+                    else{
+                        this.filter = {file_type: this.upload_form.file_type};
+                    }
 
                 }else if (this.route_path == '/riskctrl/manage') {
                     this.breadcrumbs1 = '风控管理';
                     this.breadcrumbs2 = '风控列表';
                     this.button_add = '添加风控策略';
                     this.upload_form.file_type = 'riskctrl';
+                    this.filter = {file_type: this.upload_form.file_type};
                 }else if (this.route_path == '/market/gateway') {
                     this.breadcrumbs1 = '行情接口管理';
                     this.breadcrumbs2 = '行情接口列表';
                     this.button_add = '添加行情接口';
                     this.upload_form.file_type = 'market';
+                    this.filter = {file_type: this.upload_form.file_type};
                 }else if (this.route_path == '/order/gateway') {
                     this.breadcrumbs1 = '交易接口管理';
                     this.breadcrumbs2 = '交易接口列表';
                     this.button_add = '添加交易接口';
                     this.upload_form.file_type = 'order';
+                    this.filter = {file_type: this.upload_form.file_type};
                 }
 
-                var filter = {
-                    'file_type': this.upload_form.file_type,
-                    'user_account': this.upload_form.user_account
-                };
-                this.getScriptList(1, this.page_size, filter);
+                //管理员显示所有列表
+                this.getScriptList(1, this.page_size, this.filter);
             },
             getScriptList: function(current_page, page_size, filter){//获取rom列表
                 var self = this;
@@ -198,7 +212,7 @@
                 if(response.ret_code == 0){
                     this.$message('上传成功');
                     this.dialogFormVisible = false;
-                    this.getScriptList(1, this.page_size, {'file_type': this.upload_form.file_type});
+                    this.getScriptList(1, this.page_size, this.filter);
                 }
                 else{
                     this.$message(response.ret_msg);
@@ -207,18 +221,19 @@
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
-                this.getScriptList(1, this.page_size, {'file_type': this.upload_form.file_type});
+                this.getScriptList(1, this.page_size, this.filter);
             },
 
-            downloadRom: function(id,fileName,status){//下载
+            downloadRom: function(index){//下载
                 var self = this;
-                if(status == 'revoke'){
+                if(this.script_list[index].file_status == 'revoke'){
                     self.$message({message:'脚本已下架',type:'warning'});
                     return false;
                 }
                 var params = {
-                    _id: id,
-                    file_name:fileName
+                    _id: this.script_list[index]._id,
+                    file_name:this.script_list[index].file_name,
+                    file_type:this.script_list[index].file_type
                 };
                 self.loading = true;
                 self.$axios.post('api/script/download',params).then(function(res){
@@ -243,18 +258,19 @@
                     console.log(err);
                 });
             },
-            delRom: function(id,fileName,i){//删除
+            delRom: function(index){//删除
                 var self = this;
                 var params = {
-                    _id: id,
-                    file_name:fileName
+                    _id: this.script_list[index]._id,
+                    file_name:this.script_list[index].file_name,
+                    file_type:this.script_list[index].file_type
                 };
                 self.loading = true;
                 self.$axios.post('/api/script/del',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message({message:'删除成功',type:'success'});
-                        self.getScriptList(1, self.page_size, {'file_type': self.upload_form.file_type});
+                        self.getScriptList(1, self.page_size, self.filter);
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -265,18 +281,19 @@
                     console.log(err);
                 })
             },
-            releaseRom: function(id,fileName){//上架操作
+            releaseRom: function(index){//上架操作
                 var self = this;
                 var params = {
-                    _id: id,
-                    file_name:fileName
+                    _id: this.script_list[index]._id,
+                    file_name:this.script_list[index].file_name,
+                    file_type:this.script_list[index].file_type
                 };
                 self.loading = true;
                 self.$axios.post('/api/script/release',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
-                        self.getScriptList(1, self.page_size, {'file_type': self.upload_form.file_type});
+                        self.getScriptList(1, self.page_size, self.filter);
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -286,18 +303,19 @@
                     self.loading = false;
                 })
             },
-            revokeRom: function(id,fileName){//下架操作
+            revokeRom: function(index){//下架操作
                 var self = this;
                 var params = {
-                    _id: id,
-                    file_name:fileName
+                    _id: this.script_list[index]._id,
+                    file_name:this.script_list[index].file_name,
+                    file_type:this.script_list[index].file_type
                 };
                 self.loading = true;
                 self.$axios.post('/api/script/revoke',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
-                        self.getScriptList(1, self.page_size, {'file_type': self.upload_form.file_type});
+                        self.getScriptList(1, self.page_size, self.filter);
                     }else{
                         self.$message.error(res.data.extra)
                     }

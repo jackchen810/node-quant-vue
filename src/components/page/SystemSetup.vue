@@ -51,7 +51,7 @@
                     <div class="form-box tab-cont form-box2">
                         <el-form :model="form_trade" :rules="rule_trade" label-width="150px">
                             <el-form-item>
-                                <el-button type="primary" @click="syncSubmit" v-loading.fullscreen.lock="fullscreenLoading">同步</el-button>
+                                <el-button type="primary" @click="syncSubmit" v-loading.fullscreen.lock="fullscreenLoading">同步文件到数据库</el-button>
                             </el-form-item>
                         </el-form>
                     </div>

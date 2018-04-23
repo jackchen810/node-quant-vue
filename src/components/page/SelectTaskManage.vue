@@ -122,22 +122,9 @@
         created: function(){
 
             this.getTaskList(1, this.page_size);
-            //this.getTaskListLength();
             this.getPickStrategyList();
         },
         methods: {
-            /*
-            getTaskListLength: function(){//获取task列表
-                var self = this;
-                self.loading = true;
-                self.$axios.post('/api/pick/stock/task/list/length').then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra;
-                    }
-                });
-            },
-            */
             getTaskList: function(current_page, page_size){//获取backtest task列表
                 var self = this;
                 var params = {
@@ -191,10 +178,15 @@
 
                 })
             },
+
             getPickStrategyList: function(){//获取rom列表
                 var self = this;
+                var params = {
+                    user_account:localStorage.getItem('user_account'),
+                    file_type: 'select'
+                };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/strategy/list').then(function(res){
+                self.$axios.post('/api/pick/stock/strategy/list', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.strategy_file_list = res.data.extra;
