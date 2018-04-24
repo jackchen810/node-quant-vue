@@ -16,10 +16,10 @@
             <el-table-column prop="user_account" label="管理账户" width="150"></el-table-column>
             <el-table-column label="操作" v-if="isShow" width="160">
                 <template slot-scope="scope">
-                    <el-button class="btn1" type="text" size="small" v-if="isShow" @click="downloadRom(scope.$index)">下载</el-button>
-                    <el-button class="btn1" type="text" size="small" v-if="isShow" @click="delRom(scope.$index)">删除</el-button>
-                    <el-button class="btn1" type="danger" size="small" v-if="scope.row.file_status =='normal'" @click="revokeRom(scope.$index)">下架</el-button>
-                    <el-button class="btn1" type="success" size="small" v-else @click="releaseRom(scope.$index)">上架</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="downloadRom(scope.$index)">下载</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="delRom(scope.$index)">删除</el-button>
+                    <el-button class="btn1" type="danger" size="small" v-if="scope.row.file_status =='normal' && isButtonShow" @click="revokeRom(scope.$index)">下架</el-button>
+                    <el-button class="btn1" type="success" size="small" v-else-if="isButtonShow" @click="releaseRom(scope.$index)">上架</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -75,6 +75,7 @@
                 route_path:'',
                 user_type:1,  //0:管理员, 1:用户
                 isShow:false,
+                isButtonShow:false,
                 uploadUrl:'api/script/upload',
                 upload_form: {
                     file_name:'',
@@ -120,6 +121,8 @@
 
                 if (this.route_path == '/select/strategy') {
                     this.isShow = true;
+                    this.isButtonShow = this.user_type =='1'?false:true;
+
                     this.breadcrumbs1 = '选股策略管理';
                     this.breadcrumbs2 = '选股策略列表';
                     this.button_add = '添加选股策略';
@@ -134,6 +137,8 @@
 
                 }else if (this.route_path == '/strategy/manage') {
                     this.isShow = true;
+                    this.isButtonShow = this.user_type =='1'?false:true;
+
                     this.breadcrumbs1 = '交易策略管理';
                     this.breadcrumbs2 = '交易策略列表';
                     this.button_add = '添加交易策略';
@@ -226,14 +231,16 @@
 
             downloadRom: function(index){//下载
                 var self = this;
+                var file_name = this.script_list[index].file_name;
+                var file_type = this.script_list[index].file_type;
                 if(this.script_list[index].file_status == 'revoke'){
                     self.$message({message:'脚本已下架',type:'warning'});
                     return false;
                 }
                 var params = {
                     _id: this.script_list[index]._id,
-                    file_name:this.script_list[index].file_name,
-                    file_type:this.script_list[index].file_type
+                    file_name:file_name,
+                    file_type:file_type
                 };
                 self.loading = true;
                 self.$axios.post('api/script/download',params).then(function(res){
@@ -243,7 +250,7 @@
                         const evt = document.createEvent('MouseEvents');
                         // var evt = document.createEvent("HTMLEvents")
                         evt.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-                        aLink.download = fileName;
+                        aLink.download = file_name;
                         aLink.href = global_.baseUrl + res.data.extra.access_path;
                         console.log(aLink.href);
                         //aLink.href = 'http://127.0.0.1:8000/back%20002.jpg';
