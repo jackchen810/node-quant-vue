@@ -125,7 +125,7 @@
                         self.form_trade.market_gateway = res.data.extra.market_gateway;
                     }
                 });
-                console.log('system_setup_list', self.system_setup_list);
+                //console.log('riskctrl_name', self.form_trade.riskctrl_name);
             },
             setupSubmit:function (formName) {
                 var self = this;

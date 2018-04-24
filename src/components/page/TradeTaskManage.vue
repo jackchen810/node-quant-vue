@@ -247,6 +247,7 @@
             //this.getTaskListLengthByTrade();
             this.getStrategyList();
             this.getSystemSetupList();
+            console.log('tradeTaskManage create');
         },
         beforeDestroy: function(){
             if ( this.updateTimer ) {
@@ -254,36 +255,39 @@
                 this.updateTimer = '';
             }
 
-            console.log('destory');
+            console.log('tradeTaskManage before destory');
         },
         methods: {
             getSystemSetupList: function(){//获取task列表
                 var self = this;
+                var setupObj = {
+                    order_gateway: '',
+                    riskctrl_name: '',
+                    market_gateway: '',
+
+                    total_count: 0,
+                    running_count: 0,
+                    fail_count: 0,
+                };
                 self.$axios.post('/api/system/setup/list').then(function(res){
                     if(res.data.ret_code == 0){
-
-                        var params = {
-                            order_gateway: res.data.extra.order_gateway,
-                            riskctrl_name: res.data.extra.riskctrl_name,
-                            market_gateway: res.data.extra.market_gateway,
-
-                            total_count: 0,
-                            running_count: 0,
-                            fail_count: 0,
-                        };
-                        self.system_setup_list.push(params);
+                        setupObj.order_gateway = res.data.extra.order_gateway;
+                        setupObj.riskctrl_name = res.data.extra.riskctrl_name;
+                        setupObj.market_gateway = res.data.extra.market_gateway;
                     }
-                });
-                //////////////////
-                self.$axios.post('/api/task/stats').then(function(res){
-                    if(res.data.ret_code == 0){
-                        self.system_setup_list[0].total_count = res.data.extra.total_count;
-                        self.system_setup_list[0].running_count = res.data.extra.running_count;
-                        self.system_setup_list[0].fail_count = res.data.extra.fail_count;
-                    }
-                });
 
-                console.log('system_setup_list', self.system_setup_list);
+                    //////// 2 //////////
+                    self.$axios.post('/api/task/stats').then(function(res){
+                        if(res.data.ret_code == 0){
+                            setupObj.total_count = res.data.extra.total_count;
+                            setupObj.running_count = res.data.extra.running_count;
+                            setupObj.fail_count = res.data.extra.fail_count;
+                        }
+                        self.system_setup_list.push(setupObj);
+                        //console.log('system_setup_list.length', self.system_setup_list.length);
+                    });
+
+                });
             },
             /*
             getTaskListLength: function(filter){//获取task列表
