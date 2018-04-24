@@ -7,7 +7,7 @@
             </el-breadcrumb>
         </div>
         <h4>基本信息:</h4>
-        <el-table :data="system_setup_list" border style="width: 100%;margin:20px 0 20px;" ref="multileTable" v-loading="loading">
+        <el-table :data="system_setup_list" border style="width: 100%;margin:20px 0 20px;" ref="multileTable" v-loading="setup_loading">
             <el-table-column prop="market_gateway" label="行情接口" width="180"></el-table-column>
             <el-table-column prop="riskctrl_name" label="风控名称" width="180"></el-table-column>
             <el-table-column prop="order_gateway" label="交易接口" width="180"></el-table-column>
@@ -162,7 +162,7 @@
             <h3>请先绑定行情接口</h3>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormWarnVisible = false">退 出</el-button>
-                <el-button type="primary" @click="page_forward_setup()">确 定</el-button>
+                <el-button type="primary" @click="page_forward_setup">确 定</el-button>
             </div>
         </el-dialog>
     </div>
@@ -186,6 +186,7 @@
                 form: {
                     task_id:'',
                     task_type_radio:'trade',
+                    last_task_type_radio:'',
                     task_status:'',
                     obj_amount:'',
                     trade_symbol:'00001',
@@ -219,6 +220,7 @@
 
                 formLabelWidth: '100px',
                 formLabelWidth50: '50px',
+                setup_loading:false,
                 loading:false,
                 fullscreenLoading: false,
                 system_setup_list: [],
@@ -280,7 +282,10 @@
                     }
 
                     //////// 2 //////////
-                    self.$axios.post('/api/task/stats').then(function(res){
+                    var filter = {
+                        user_account: localStorage.getItem('user_account')
+                    };
+                    self.$axios.post('/api/task/stats', {filter: filter}).then(function(res){
                         if(res.data.ret_code == 0){
                             setupObj.total_count = res.data.extra.total_count;
                             setupObj.running_count = res.data.extra.running_count;
@@ -405,6 +410,7 @@
                     //trade_symbol:self.form.trade_symbol,
                     //stock_name:self.form.stock_name,
                     //obj_amount:self.form.obj_amount,
+                    user_account: localStorage.getItem('user_account'),
                     task_type:self.form.task_type_radio,
                     strategy_type:self.form.strategy_type,
                     strategy_list:self.form.strategy_list,
@@ -443,7 +449,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
-                        self.getTaskListByTrade(1, self.page_size);
+                        this.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
                     }
                     else {
                         self.$message(res.data.extra);
@@ -465,7 +471,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskListByTrade(1, self.page_size);
+                        this.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
                     }
                     else {
                         self.$message(res.data.extra);

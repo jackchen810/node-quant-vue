@@ -87,13 +87,14 @@
                 loading:false,
                 fullscreenLoading: false,
 
-                pageTotal:0,
-                currentPage:1
+                pageTotal:1,
+                currentPage:1,
+                page_size:10
             }
         },
         created: function(){
             this.getPlanFileList();
-            this.getTaskPlanList();
+            this.getTaskPlanList(1, this.page_size);
 
             //this.getValidStockList();
         },
@@ -120,13 +121,19 @@
                 })
             },
 
-            getTaskPlanList: function(){//获取task列表
+            getTaskPlanList: function(current_page, page_size, filter){//获取task列表
                 var self = this;
+                var params = {
+                    filter: filter,
+                    page_size: page_size,
+                    current_page: current_page,
+                };
                 self.loading = true;
-                self.$axios.post('/api/download/plan/list').then(function(res){
+                self.$axios.post('/api/download/plan/list', params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0) {
                         self.task_plan_list = res.data.extra;
+                        self.pageTotal = res.data.total;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -137,6 +144,7 @@
                 var self = this;
 
                 var params = {
+                    user_account: localStorage.getItem('user_account'),
                     task_exce_time:self.form.task_exce_time,
                     task_plan_script:self.form.task_plan_script,
                 };
@@ -147,7 +155,7 @@
                     console.log(res);
                     if(res.data.ret_code == 0){
                         self.$message('添加成功');
-                        self.getTaskPlanList();
+                        self.getTaskPlanList(1, this.page_size);
                     }
                     else{
                         self.$message('添加失败:' + res.data.extra);
@@ -170,7 +178,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
-                        self.getTaskPlanList();
+                        self.getTaskPlanList(1, this.page_size);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -192,7 +200,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskPlanList();
+                        self.getTaskPlanList(1, this.page_size);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -214,7 +222,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskPlanList();
+                        self.getTaskPlanList(1, this.page_size);
                         clearTimeout(self.updateTimer);
                     }
                     else {
@@ -229,7 +237,7 @@
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
-                this.getTaskPlanList();
+                this.getTaskPlanList(1, this.page_size);
             },
         },
         computed:{

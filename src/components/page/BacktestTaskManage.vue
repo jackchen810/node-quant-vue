@@ -315,6 +315,7 @@
 
                 var params = {
                     //trade_symbol:self.form.trade_symbol,
+                    user_account: localStorage.getItem('user_account'),
                     strategy_type:self.form.strategy_type,
                     strategy_list:self.form.strategy_list,
                     start_time:self.form.start_time,

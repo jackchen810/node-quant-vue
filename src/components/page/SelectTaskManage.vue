@@ -202,6 +202,7 @@
             saveAdd: function(formName){
                 var self = this;
                 var params = {
+                    user_account: localStorage.getItem('user_account'),
                     strategy_name:this.form.strategy_name,
                     stock_ktype:this.form.stock_ktype,
                     stock_range:this.form.stock_range,
