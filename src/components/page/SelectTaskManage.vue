@@ -85,6 +85,7 @@
 
                 dialogFormVisible:false,
                 radio3:'全部',
+                user_type:1,  //0:管理员, 1:用户
 
 
                 form: {
@@ -121,13 +122,15 @@
         },
         created: function(){
 
+            this.user_type = localStorage.getItem('user_type');  //管理员或用户
             this.getTaskList(1, this.page_size);
             this.getPickStrategyList();
         },
         methods: {
-            getTaskList: function(current_page, page_size){//获取backtest task列表
+            getTaskList: function(current_page, page_size, filter){//获取backtest task列表
                 var self = this;
                 var params = {
+                    filter: filter,
                     page_size: page_size,
                     current_page: current_page,
                 };
@@ -181,12 +184,12 @@
 
             getPickStrategyList: function(){//获取rom列表
                 var self = this;
-                var params = {
-                    user_account:localStorage.getItem('user_account'),
-                    file_type: 'select'
+                var filter = {
+                    file_type: 'select',
+                    user_account: localStorage.getItem('user_account')
                 };
                 self.loading = true;
-                self.$axios.post('/api/pick/stock/strategy/list', params).then(function(res){
+                self.$axios.post('/api/pick/stock/strategy/list', {filter: filter}).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.strategy_file_list = res.data.extra;
@@ -209,7 +212,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.dialogFormVisible = false;
-                        self.getTaskList();
+                        self.getTaskList(self.currentPage, self.page_size);
                     }
                     else{
                         console.log('resp:', res.data)
@@ -226,7 +229,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
-                        self.getTaskList();
+                        self.getTaskList(self.currentPage, self.page_size);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -248,7 +251,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList();
+                        self.getTaskList(self.currentPage, self.page_size);
                         //启动定时器，定时查询状态
                         self.updateTimer = setTimeout(function(){
                             self.getTaskStatusById(task_id);
@@ -274,7 +277,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList();
+                        self.getTaskList(self.currentPage, self.page_size);
                         clearTimeout(self.updateTimer);
                     }
                     else {

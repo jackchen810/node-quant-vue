@@ -179,6 +179,7 @@
                 dialogFormWarnVisible:false,
                 dialogMarketVisible:false,
                 dialogCheckVisible:false,
+                user_type:1,  //0:管理员, 1:用户
 
                 updateTimer:'',
 
@@ -236,6 +237,8 @@
                 this.updateTimer = '';
             }
 
+            this.user_type = localStorage.getItem('user_type');  //管理员或用户
+
             //通过选股任务跳转
             if (this.getTaskType == 'monitor'){
                 this.form.task_type_radio = 'monitor';
@@ -289,21 +292,6 @@
 
                 });
             },
-            /*
-            getTaskListLength: function(filter){//获取task列表
-                var self = this;
-                var params = {
-                    filter: filter,
-                };
-                self.loading = true;
-                self.$axios.post('/api/task/list/length', params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra;
-                    }
-                })
-            },
-            */
             getTaskList: function(current_page, page_size, filter){//获取task列表
                 var self = this;
                 var params = {
@@ -367,7 +355,11 @@
             getStrategyList: function(){//获取rom列表
                 var self = this;
                 self.loading = true;
-                self.$axios.post('/api/strategy/list').then(function(res){
+                var filter = {
+                    file_type: 'trade',
+                    user_account: localStorage.getItem('user_account')
+                };
+                self.$axios.post('/api/strategy/list', {filter: filter}).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.strategy_file_list = res.data.extra;
@@ -426,10 +418,12 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('添加成功');
-                        self.getTaskListByTrade(1, self.page_size);
+
+                        //更新列表
+                        this.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
                     }
                     else{
-                        self.$message('添加失败:' + res.data.extra);
+                        self.$message('添加失败:' + res.data.ret_msg);
                     }
 
                 },function(err){
