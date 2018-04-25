@@ -242,14 +242,10 @@
             this.user_type = localStorage.getItem('user_type');  //管理员或用户
 
             //通过选股任务跳转
-            if (this.getTaskType == 'monitor'){
+            if (this.getTaskType == 'monitor') {
                 this.form.task_type_radio = 'monitor';
-                this.getTaskListByMonitor(1, this.page_size);
             }
-            else{
-                this.getTaskListByTrade(1, this.page_size);
-            }
-            //this.getTaskListLengthByTrade();
+            this.getTaskList(1, this.page_size, {task_type: this.form.task_type_radio});
             this.getStrategyList();
             this.getSystemSetupList();
             console.log('tradeTaskManage create');
@@ -315,12 +311,6 @@
                         self.task_list = [];
                     }
                 })
-            },
-            getTaskListByTrade: function(current_page, page_size){//获取task列表
-                this.getTaskList(current_page, page_size, {task_type: 'trade'});
-            },
-            getTaskListByMonitor: function(current_page, page_size){//获取task列表
-                this.getTaskList(current_page, page_size, {task_type: 'monitor'});
             },
             getTaskPrice: function(){//获取task列表
                 var self = this;
@@ -426,7 +416,7 @@
                         self.$message('添加成功');
 
                         //更新列表
-                        this.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
+                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
                     }
                     else{
                         self.$message('添加失败:' + res.data.ret_msg);
@@ -449,7 +439,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
-                        this.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
+                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
                     }
                     else {
                         self.$message(res.data.extra);
@@ -471,7 +461,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        this.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
+                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
                     }
                     else {
                         self.$message(res.data.extra);
@@ -493,7 +483,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskListByTrade(1, self.page_size);
+                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
                     }
                     else {
                         self.$message(res.data.extra);
@@ -530,16 +520,11 @@
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
-                this.getTaskListByTrade(this.currentPage, this.page_size);
+                this.getTaskList(this.currentPage, this.page_size, {task_type: 'trade'});
             },
             changeTab: function(){
                 var self = this;
-                if(self.form.task_type_radio == 'trade'){
-                    self.getTaskListByTrade(1, self.page_size);
-                }
-                if(self.form.task_type_radio == 'monitor'){
-                    self.getTaskListByMonitor(1, self.page_size);
-                }
+                self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
             },
             search: function(){
                 var self = this;
