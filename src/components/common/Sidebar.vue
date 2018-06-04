@@ -69,6 +69,21 @@
                             }
                         ]
                     },
+                    {
+                        icon: 'el-icon-edit',
+                        index: '7',
+                        title: '历史数据管理',
+                        subs: [
+                            {
+                                index: '/data/manage',
+                                title: '计划列表'
+                            },
+                            {
+                                index: '/history/data',
+                                title: '历史数据'
+                            },
+                        ]
+                    },
                 ],
                 items_user:[
                     {
@@ -147,21 +162,6 @@
                                 index: '/backtest/result',
                                 title: '回测结果'
                             }
-                        ]
-                    },
-                    {
-                        icon: 'el-icon-edit',
-                        index: '7',
-                        title: '历史数据管理',
-                        subs: [
-                            {
-                                index: '/data/manage',
-                                title: '计划列表'
-                            },
-                            {
-                                index: '/history/data',
-                                title: '历史数据'
-                            },
                         ]
                     },
                 ]

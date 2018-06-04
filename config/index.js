@@ -20,20 +20,20 @@ module.exports = {
         // `npm run build --report`
         // Set to `true` or `false` to always turn it on or off
         bundleAnalyzerReport: process.env.npm_config_report,
-        webServer: 'http://localhost:8000',
+        webServer: 'http://127.0.0.1:8000',
         //local_webServer: 'http://localhost:8000',
     },
     dev: {   //开发环境会有跨域问题
         env: require('./dev.env'),
-        port: 80,
+        port: 8100,    //本地调试端口
         autoOpenBrowser: true,
         assetsSubDirectory: 'static',
         assetsPublicPath: '/',
         proxyTable: {
             '/api':{
-                //8000 是后端地址端口，local运行时前端使用80，后端使用8000 端口
-                target:'http://127.0.0.1:8000',
-                changeOrigin:true,
+                //8000 是后端地址端口，local运行时前端使用8001，后端使用8000 端口
+                target:'http://127.0.0.1:8101',  // 接口域名
+                changeOrigin:true,  //是否跨域
                 pathRewrite:{
                     '^/api':'/api'
                 }
