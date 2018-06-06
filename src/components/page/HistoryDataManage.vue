@@ -164,7 +164,7 @@
                     }
                     var fields = data_substr[1].split(",");
                     self.form.stock_name = fields[0];
-                    this.getHistoryList(1, this.page_size);
+                    self.getHistoryList(1, self.page_size);
 
                 },function(err){
                     self.form.stock_name = '';

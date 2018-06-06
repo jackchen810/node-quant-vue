@@ -177,6 +177,10 @@
                 this.items = this.items_user.concat(this.items_common);
             }
 
+            //安照index 排序
+            this.items  = this.items.sort( function sortId(a,b){
+                return a.index-b.index;
+            });
 
         },
         computed:{

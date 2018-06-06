@@ -155,7 +155,7 @@
                     console.log(res);
                     if(res.data.ret_code == 0){
                         self.$message('添加成功');
-                        self.getTaskPlanList(1, this.page_size);
+                        self.getTaskPlanList(1, self.page_size);
                     }
                     else{
                         self.$message('添加失败:' + res.data.extra);
@@ -178,7 +178,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
-                        self.getTaskPlanList(1, this.page_size);
+                        self.getTaskPlanList(1, self.page_size);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -200,7 +200,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskPlanList(1, this.page_size);
+                        self.getTaskPlanList(1, self.page_size);
                     }
                     else {
                         self.$message(res.data.extra);
@@ -222,7 +222,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskPlanList(1, this.page_size);
+                        self.getTaskPlanList(1, self.page_size);
                         clearTimeout(self.updateTimer);
                     }
                     else {
