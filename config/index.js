@@ -20,7 +20,7 @@ module.exports = {
         // `npm run build --report`
         // Set to `true` or `false` to always turn it on or off
         bundleAnalyzerReport: process.env.npm_config_report,
-        webServer: 'http://localhost:8101',
+        webServer: 'http://localhost:8000',
         //local_webServer: 'http://localhost:8000',
     },
     dev: {   //开发环境会有跨域问题
@@ -32,7 +32,7 @@ module.exports = {
         proxyTable: {
             '/api':{
                 //8000 是后端地址端口，local运行时前端使用8001，后端使用8000 端口
-                target:'http://localhost:8101',  // 接口域名
+                target:'http://localhost:8000',  // 接口域名
                 changeOrigin:true,  //是否跨域
                 pathRewrite:{
                     '^/api':'/api'
