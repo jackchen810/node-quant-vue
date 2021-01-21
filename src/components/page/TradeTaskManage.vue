@@ -37,9 +37,9 @@
         </div>
         -->
         <div class='rad-group'>
-            <el-radio-group v-model="form.task_type_radio" @change="changeTab">
+            <el-radio-group v-model="form.task_type" @change="changeTab">
                 <el-radio-button label="trade">自动化交易任务</el-radio-button>
-                <el-radio-button label="monitor">机器人盯盘任务</el-radio-button>
+                <el-radio-button label="simulate">机器人模拟交易任务</el-radio-button>
             </el-radio-group>
             <el-form :inline="true" class="handle-box2">
                 <el-form-item label="">
@@ -59,22 +59,30 @@
            <el-table-column prop="trade_ktype" label="K线类型" width="100"></el-table-column>
            <el-table-column prop="task_type" label="任务类型" width="100"></el-table-column>
            -->
-            <el-table-column prop="task_type_radio" label="任务类型" width="110">
+            <el-table-column prop="task_type" label="任务类型" width="130">
                 <template slot-scope="scope">
-                    <el-tag type="primary">{{form.task_type_radio == 'trade'?'自动化交易':'机器人盯盘'}}</el-tag>
+                    <el-tag type="primary">{{form.task_type == 'trade'?'自动化交易':'机器人模拟交易'}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column prop="task_id" label="任务ID" width="220"></el-table-column>
-            <el-table-column prop="trade_ktype" label="K线类型"></el-table-column>
-            <el-table-column prop="strategy_name" label="交易策略" width="180"></el-table-column>
             <el-table-column prop="trade_symbol" label="交易标的"></el-table-column>
+            <el-table-column prop="trade_symbol_name" label="标的名称"></el-table-column>
+            <el-table-column prop="trade_amount" label="交易数量"></el-table-column>
             <el-table-column prop="task_status" label="运行状态"></el-table-column>
-            <el-table-column label="操作" width="250">
+            <el-table-column prop="create_at" label="创建时间"></el-table-column>
+            <el-table-column prop="strategy_type" label="策略类型"></el-table-column>
+            <el-table-column label="策略详情" width="110">
                 <template slot-scope="scope">
+                    <el-button class="btn1" type="primary" size="small" @click="page_forward_detail(scope.row.strategy_list)">策略详情</el-button>
+                 </template>
+            </el-table-column>
+            <el-table-column label="操作" width="400">
+                <template slot-scope="scope">
+                    <!--<el-button class="btn1" type="primary" size="small" @click="page_forward_detail(scope.row.task_id)">策略详情</el-button>-->
                     <el-button class="btn1" type="primary" size="small" @click="delTask(scope.row.task_id)">删除</el-button>
                     <el-button class="btn1" type="danger" size="small" v-if="scope.row.task_status =='running'" @click="stopTask(scope.row.task_id)">停止</el-button>
                     <el-button class="btn1" type="success" size="small" v-else @click="startTask(scope.row.task_id)">启动</el-button>
-                    <el-button class="btn1" type="primary" size="small" @click="page_forward_detail(scope.row.task_id)">任务详情</el-button>
+                    <el-button class="btn1" type="success" size="small" @click="changeTask(scope.row.task_id)">转为回测任务</el-button>
+                    <el-button class="btn1" type="success" size="small" @click="changeTask(scope.row.task_id)">转为交易任务</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -88,12 +96,6 @@
         </div>
         <el-dialog title="添加交易任务" :visible.sync="dialogFormVisible" class="digform" >
             <el-form :model="form" :rules="rules" ref="form">
-                <el-form-item label="" prop="task_type_radio" :inline="true":label-width="formLabelWidth">
-                        <el-radio-group v-model="form.task_type_radio">
-                            <el-radio label="trade">自动化交易</el-radio>
-                            <el-radio label="monitor">机器人盯盘</el-radio>
-                        </el-radio-group>
-                </el-form-item>
                 <el-form-item label="策略名称" prop="strategy_list" :label-width="formLabelWidth"
                     v-for="(item, index) in form.strategy_list"
                     :label="'策略' + index"
@@ -101,14 +103,13 @@
                     :prop="item.key"
                     >
                     <div class="block">
-                        <label>股票代码：</label>
+                        <label>策略标的：</label>
                         <el-input v-model="form.strategy_list[index].stock_symbol" class="inp150" auto-complete="off" placeholder="请输入股票代码" @change="changeStockSymbol(index)"></el-input>
                         <span v-text="form.strategy_list[index].stock_name"></span>
                     </div>
                     <div>
                         <label>K 线周期：</label>
-                        <el-input v-model="form.strategy_main" v-if="index==0&&form.strategy_type>1" class="inp180" auto-complete="off" :disabled="true"></el-input>
-                        <el-select v-model="form.strategy_list[index].stock_ktype" v-else class="inp180" placeholder="请选择K线周期">
+                        <el-select v-model="form.strategy_list[index].stock_ktype" class="inp150" placeholder="请选择K线周期">
                             <el-option label="1分钟" value="1"></el-option>
                             <el-option label="5分钟" value="5"></el-option>
                             <el-option label="15分钟" value="15"></el-option>
@@ -120,13 +121,9 @@
                             <el-option label="月线" value="month"></el-option>
                         </el-select>
                     </div>
-                    <div v-if="index==0">
-                        <label>交易数量：</label>
-                        <el-input v-model="form.strategy_list[index].trade_amount" class="inp180" auto-complete="off" placeholder="请输入交易数量"></el-input>
-                    </div>
                     <div>
                         <label>对应策略：</label>
-                        <el-select v-model="form.strategy_list[index].strategy_name" class="inp180" placeholder="请选择对应策略">
+                        <el-select v-model="form.strategy_list[index].strategy_name" class="inp300" placeholder="请选择对应策略"  @change="changeStockSymbol(index)">
                             <el-option
                                     v-for="item in strategy_file_list"
                                     :key="item"
@@ -140,17 +137,36 @@
                     </div>
                 </el-form-item>
                 <el-form-item label="" prop="strategy_type" :inline="true":label-width="formLabelWidth">
-                    <el-radio-group v-model="form.strategy_type" @change="changeStrategyItem(index)" :inline="true">
+                    <el-radio-group v-model="form.strategy_type" @change="changeStockSymbol(0)" :inline="true">
                         <el-radio label="1">简单策略</el-radio>
                         <el-radio label="2">多级别分析策略</el-radio>
-                        <el-radio label="3">综合分析策略（策略0为主策略）</el-radio>
+                        <el-radio label="3">综合分析策略</el-radio>
                     </el-radio-group>
                 </el-form-item>
-                <el-form-item label="风控名称" prop="riskctrl_name" :label-width="formLabelWidth" v-if="form.task_type_radio=='trade'">
+                <el-form-item label="风控名称" prop="riskctrl_name" :label-width="formLabelWidth">
                     <el-input v-model="form.riskctrl_name" class="inp200" auto-complete="off" :disabled="true"></el-input>
                 </el-form-item>
-                <el-form-item label="交易接口" prop="order_gateway" :label-width="formLabelWidth" v-if="form.task_type_radio=='trade'">
+                <el-form-item label="交易接口" prop="order_gateway" :label-width="formLabelWidth">
                     <el-input v-model="form.order_gateway" class="inp200" auto-complete="off" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="交易标的" prop="trade_symbol" :label-width="formLabelWidth">
+                    <div  v-if="form.strategy_type==1">
+                        <el-input v-model="form.strategy_list[0].stock_symbol" class="inp150" auto-complete="off" :disabled="true" placeholder="请输入股票代码" @change="changeTradeStockSymbol(form.strategy_list[0].stock_symbol)"></el-input>
+                        <span v-text="form.strategy_list[0].stock_name"></span>
+                    </div>
+                    <div  v-else="form.strategy_type==1">
+                        <el-input  v-model="form.trade_symbol" class="inp150" auto-complete="off" placeholder="请输入股票代码" @change="changeTradeStockSymbol(form.trade_symbol)"></el-input>
+                        <span v-text="form.trade_symbol_name"></span>
+                    </div>
+                </el-form-item>
+                <el-form-item label="交易数量" prop="trade_amount" :label-width="formLabelWidth">
+                    <el-input v-model="form.trade_amount" class="inp150" auto-complete="off" placeholder="请输入交易数量"></el-input>
+                </el-form-item>
+                <el-form-item label="" prop="task_type" :inline="true":label-width="formLabelWidth">
+                    <el-radio-group v-model="form.task_type">
+                        <el-radio label="trade">自动化交易</el-radio>
+                        <el-radio label="simulate">机器人模拟交易</el-radio>
+                    </el-radio-group>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -163,6 +179,15 @@
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormWarnVisible = false">退 出</el-button>
                 <el-button type="primary" @click="page_forward_setup">确 定</el-button>
+            </div>
+        </el-dialog>
+        <el-dialog title="显示策略详情" :visible.sync="dialogCheckVisible" class="digformwarn">
+            <div>
+            <p v-for="(item, i) in cur_strategy_list" >策略{{i}}：{{item}}</p>
+        </div>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogCheckVisible = false">退 出</el-button>
+                <el-button @click="dialogCheckVisible = false">确 定</el-button>
             </div>
         </el-dialog>
     </div>
@@ -185,20 +210,16 @@
 
                 form: {
                     task_id:'',
-                    task_type_radio:'trade',
-                    last_task_type_radio:'',
+                    task_type:'trade', //trade， simulate//backtest
                     task_status:'',
-                    obj_amount:'',
                     trade_symbol:'00001',
-                    trade_ktype:'1',
-                    stock_name:'www',
-                    strategy_main:'主策略',
-                    strategy_type:'1',
+                    trade_symbol_name:'测试',
+                    trade_amount:'',
+                    strategy_type:'1', //策略类型， 1：简单策略，2：多级别分析策略， 3：综合分析策略
                     strategy_list:[{
                         stock_symbol:'',
                         stock_name:'',
                         stock_ktype:'',
-                        trade_amount:'',
                         strategy_name:'',
                     }],
                     riskctrl_name: '',
@@ -212,6 +233,12 @@
                     ],
                     order_gateway:[
                         {required: true, message: '请输入交易接口', trigger: 'blur'}
+                    ],
+                    trade_symbol:[
+                        {required: true, message: '请输入交易标的', trigger: 'blur'}
+                    ],
+                    trade_amount:[
+                        {required: true, message: '请输入交易数量', trigger: 'blur'}
                     ],
                 },
                 log:{
@@ -227,6 +254,7 @@
                 task_list:[],
                 strategy_file_list:[],
                 valid_stock_list:[],
+                cur_strategy_list:[],
 
                 pageTotal:1,
                 currentPage:1,
@@ -242,10 +270,13 @@
             this.user_type = localStorage.getItem('user_type');  //管理员或用户
 
             //通过选股任务跳转
-            if (this.getTaskType == 'monitor') {
-                this.form.task_type_radio = 'monitor';
+            if (this.getTaskType == 'simulate') {
+                this.form.task_type = 'simulate';
             }
-            this.getTaskList(1, this.page_size, {task_type: this.form.task_type_radio});
+            else{
+                this.form.task_type = 'trade';
+            }
+            this.getTaskList(1, this.page_size, {task_type: this.form.task_type});
             this.getStrategyList();
             this.getSystemSetupList();
             console.log('tradeTaskManage create');
@@ -281,14 +312,14 @@
                     var filter = {
                         user_account: localStorage.getItem('user_account')
                     };
-                    self.$axios.post('/api/task/stats', {filter: filter}).then(function(res){
+                    self.$axios.post('/api/task/statistic', {filter: filter}).then(function(res){
                         if(res.data.ret_code == 0){
                             setupObj.total_count = res.data.extra.total_count;
                             setupObj.running_count = res.data.extra.running_count;
                             setupObj.fail_count = res.data.extra.fail_count;
                         }
                         self.system_setup_list.push(setupObj);
-                        //console.log('system_setup_list.length', self.system_setup_list.length);
+                        //console.log('system_setup_list:', self.system_setup_list);
                     });
 
                 });
@@ -314,7 +345,7 @@
             },
             getTaskPrice: function(){//获取task列表
                 var self = this;
-                var stock_list = []
+                var stock_list = [];
                 for (var i = 0; i < self.task_list.length; i++) {
                     if (self.task_list[i].task_status == 'running'){
                         stock_list.push({task_id:self.task_list[i].task_id, trade_symbol:self.task_list[i].trade_symbol})
@@ -329,7 +360,7 @@
                             var item = res.data.extra[i];
                             for (var j = 0; j < self.task_list.length; j++) {
                                 if (item['trade_symbol'] == self.task_list[j]['trade_symbol']){
-                                    self.task_list[j]['price'] = item['price']
+                                    self.task_list[j]['price'] = item['price'];
                                     self.task_list[j]['volume'] = item['volume']
                                 }
                             }
@@ -338,8 +369,8 @@
                     else{
                         console.log('resp:', res.data)
                     }
-                })
-                console.log(this.$route.path )
+                });
+                console.log(this.$route.path );
                 if ( this.$route.path == '/task/manage' ) {
                     this.updateTimer = setTimeout(() => {
                         //this.getTaskPrice();
@@ -377,16 +408,16 @@
             getStockName: function(){//获取设备类型
                 var self = this;
                 if (self.form.trade_symbol.length < 6){
-                    self.form.stock_name = '';
+                    self.form.trade_symbol_name = '';
                     return;
                 }
 
-                var params = {trade_symbol:self.form.trade_symbol}
+                var params = {trade_symbol:self.form.trade_symbol};
                 self.loading = false;
                 self.$axios.post('/api/stock/name', params).then(function(res){
                     //self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.form.stock_name = res.data.extra;
+                        self.form.trade_symbol_name = res.data.extra;
                     }
                     else{
                         console.log('resp:', res.data)
@@ -396,19 +427,37 @@
             saveAdd: function(formName){
                 var self = this;
 
+                ///简单策略交易标的和策略标的相同
+                var strategy_type_name = '';
+                if (self.form.strategy_type == 1){
+                    self.form.trade_symbol = self.form.strategy_list[0].stock_symbol;
+                    self.form.trade_symbol_name = self.form.strategy_list[0].stock_name;
+                    strategy_type_name="简单策略";
+                }
+                else if (self.form.strategy_type == 2) {
+                    strategy_type_name="多级别分析策略";
+                }
+                else if(self.form.strategy_type == 3) {
+                    strategy_type_name="综合分析策略";
+                }
+
                 var params = {
-                    //trade_symbol:self.form.trade_symbol,
-                    //stock_name:self.form.stock_name,
-                    //obj_amount:self.form.obj_amount,
+                    //strategy_type:self.form.strategy_type,
                     user_account: localStorage.getItem('user_account'),
-                    task_type:self.form.task_type_radio,
-                    strategy_type:self.form.strategy_type,
+                    task_type:self.form.task_type,
+
+                    trade_symbol:self.form.trade_symbol,
+                    trade_symbol_name:self.form.trade_symbol_name,
+                    trade_amount:self.form.trade_amount,
+
+                    strategy_type:strategy_type_name,
                     strategy_list:self.form.strategy_list,
                     riskctrl_name:self.form.riskctrl_name,
                     order_gateway:self.form.order_gateway,
                     market_gateway:self.form.market_gateway
                 };
 
+                //console.log('task add market_gateway:', self.form.market_gateway);
                 self.loading = true;
                 self.$axios.post('/api/task/add', params).then(function(res){
                     self.loading = false;
@@ -416,7 +465,7 @@
                         self.$message('添加成功');
 
                         //更新列表
-                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
+                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type});
                     }
                     else{
                         self.$message('添加失败:' + res.data.ret_msg);
@@ -439,7 +488,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
-                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
+                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type});
                     }
                     else {
                         self.$message(res.data.extra);
@@ -455,13 +504,14 @@
                 var self = this;
                 var params = {
                     task_id: task_id,
+                    task_type: self.form.task_type,
                 };
                 self.loading = true;
                 self.$axios.post('/api/task/start',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
+                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type});
                     }
                     else {
                         self.$message(res.data.extra);
@@ -483,7 +533,7 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         self.$message('操作成功');
-                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
+                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type});
                     }
                     else {
                         self.$message(res.data.extra);
@@ -495,8 +545,36 @@
                     console.log(err);
                 })
             },
+            changeTask: function(task_id){//下架操作
+                var self = this;
+                var params = {
+                    task_id: task_id,
+                    task_type: self.form.task_type,
+                    trade_symbol: self.form.trade_symbol,
+                    dst_task_type: 'backtest',   //切换到回测任务
+                };
+                self.loading = true;
+                self.$axios.post('/api/task/change', params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message('操作成功');
+                        self.getTaskList(1, self.page_size, {task_type: self.form.task_type});
+                        self.$router.push({name: 'BacktestTaskManage'});
+                    }
+                    else {
+                        self.$message(res.data.ret_msg);
+                    }
+
+                },function(err){
+                    self.$message('操作失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+            },
             createTask: function(){//task detail操作
                 var self = this;
+
+                //恢复一些数据， 弹出对话框
                 if (self.system_setup_list.length == 0 ) {
                     self.dialogFormWarnVisible = true;
                 }
@@ -510,13 +588,17 @@
                     self.form.order_gateway = self.system_setup_list[0].order_gateway;
                     self.form.riskctrl_name = self.system_setup_list[0].riskctrl_name;
                     self.form.market_gateway = self.system_setup_list[0].market_gateway;
+                    //console.log('self.form.market_gateway', self.form.market_gateway);
                 }
             },
             page_forward_setup: function(){
                 this.$router.push({name: 'SystemSetup'});
             },
-            page_forward_detail: function(task_id){//task detail操作
-                this.$router.push({name:'TradeTaskDetail', params :{task_id: task_id}});
+            page_forward_detail: function(strategy_list){//task detail操作
+                //this.$router.push({name:'TradeTaskDetail', params :{task_id: task_id}});
+                this.dialogCheckVisible = true;
+                this.cur_strategy_list = strategy_list;
+                console.log('this.cur_strategy_list', this.cur_strategy_list);
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
@@ -524,22 +606,30 @@
             },
             changeTab: function(){
                 var self = this;
-                self.getTaskList(1, self.page_size, {task_type: self.form.task_type_radio});
+                self.getTaskList(1, self.page_size, {task_type: self.form.task_type});
             },
             search: function(){
                 var self = this;
 
             },
             changeStockSymbol:function(index) {
-
                 var stock_symbol = this.form.strategy_list[index].stock_symbol;
+                var stock_name = this.form.strategy_list[index].stock_name;
+                console.log("changeStockSymbol:", index, stock_symbol, stock_name);
+                //var strategy_name = this.form.strategy_list[0].strategy_name;
 
                 //所有行的stock_symbol 一致
                 if (this.form.strategy_type == 2) {
+                    console.log("strategy_list:", this.form.strategy_list);
                     //var value = this.form.strategy_list[index].stock_symbol;
                     for(var i = 0; i<this.form.strategy_list.length; i++){
                         this.form.strategy_list[i].stock_symbol = stock_symbol;
+                        this.form.strategy_list[i].stock_name = stock_name;
+                        this.form.strategy_list[i].strategy_name = this.form.strategy_list[index].strategy_name;
                     }
+                    // 交易代码修改
+                    this.form.trade_symbol = this.form.strategy_list[index].stock_symbol;
+                    this.form.trade_symbol_name = this.form.strategy_list[index].stock_name;
                 }
 
 
@@ -562,7 +652,13 @@
                     }
                     var fields = data_substr[1].split(",");
                     self.form.strategy_list[index].stock_name = fields[0];
-
+                    //更新股票名称
+                    if (self.form.strategy_type == 2) {
+                        for (var i = 0; i < self.form.strategy_list.length; i++) {
+                            self.form.strategy_list[i].stock_name = self.form.strategy_list[index].stock_name;
+                            self.form.trade_symbol_name = self.form.strategy_list[index].stock_name;
+                        }
+                    }
                 },function(err){
                     self.form.strategy_list[index].stock_name = '';
                     console.log(err);
@@ -570,7 +666,36 @@
 
 
             },
-            changeStrategyItem: function(index) {
+            changeTradeStockSymbol:function(stock_symbol) {
+
+                //获取stock_symbol  对应的名称
+                if (stock_symbol.length != 6){
+                    this.form.trade_symbol_name = '';
+                    return;
+                }
+                var self = this;
+                var params = '';
+                if (stock_symbol[0] == '6') {
+                    params = '/sina/list=' + 'sh' + stock_symbol;
+                }else{
+                    params = '/sina/list=' + 'sz' + stock_symbol;
+                }
+                self.$axios.get(params).then(function(res){
+                    var data_substr = res.data.match(/\"(\S*)(?=\")/);
+                    if (data_substr == null) {
+                        return;
+                    }
+                    var fields = data_substr[1].split(",");
+                    self.form.trade_symbol_name = fields[0];
+
+                },function(err){
+                    self.form.trade_symbol_name = '';
+                    console.log(err);
+                })
+
+
+            },
+            changeStrategyItem: function() {
                 //只保留一行
                 var list0 = this.form.strategy_list[0];
                 if (this.form.strategy_type == 1) {
@@ -581,15 +706,19 @@
                 this.form.strategy_list.splice(index, 1);
             },
             addStrategyItem(index) {
+                //console.log('addStrategyItem');
                 var stock_symbol = '';
                 if (this.form.strategy_type == 2) {
                     var stock_symbol = this.form.strategy_list[0].stock_symbol;
+                    var stock_name = this.form.strategy_list[0].stock_name;
+                    var strategy_name = this.form.strategy_list[index].strategy_name;
                 }
 
                 this.form.strategy_list.push({
                     stock_symbol:stock_symbol,
+                    stock_name:stock_name,
                     stock_ktype:'',
-                    strategy_name:'',
+                    strategy_name:strategy_name,
                 });
 
             }

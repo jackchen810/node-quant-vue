@@ -53,6 +53,7 @@
                             <el-form-item>
                                 <el-button type="primary" @click="syncSubmit" v-loading.fullscreen.lock="fullscreenLoading">同步文件到数据库</el-button>
                             </el-form-item>
+                            <label>文件保存在目录中，数据库中有上下架，状态等相关记载，这里同步该信息。</label>
                         </el-form>
                     </div>
                 </el-tab-pane>

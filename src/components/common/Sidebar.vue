@@ -116,8 +116,23 @@
                 ],
                 items_common: [
                     {
-                        icon: 'el-icon-service',
+                        icon: 'el-icon-document',
                         index: '4',
+                        title: '选股系统管理',
+                        subs: [
+                            {
+                                index: '/select/manage',
+                                title: '任务列表'
+                            },
+                            {
+                                index: '/select/result',
+                                title: '选股结果'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-service',
+                        index: '5',
                         title: '交易任务管理',
                         subs: [
                             {
@@ -132,21 +147,6 @@
                                 index: '/task/buysell',
                                 title: '买卖点统计'
                             },
-                        ]
-                    },
-                    {
-                        icon: 'el-icon-document',
-                        index: '5',
-                        title: '选股系统管理',
-                        subs: [
-                            {
-                                index: '/select/manage',
-                                title: '任务列表'
-                            },
-                            {
-                                index: '/select/result',
-                                title: '选股结果'
-                            }
                         ]
                     },
                     {
